@@ -1,0 +1,30 @@
+services:
+  api:
+    build: ./api
+    ports:
+      - "8000:8000"
+    environment:
+      ML_SHARED_SECRET: ${ML_SHARED_SECRET:-dev-shared-secret}
+      CORS_ORIGINS: http://localhost:3000
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-openai/gpt-oss-120b}
+    volumes:
+      - ./api/data/chroma:/app/data/chroma
+      - ./api/knowledge/official:/app/knowledge/official
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      ML_API_URL: http://api:8000
+      ML_SHARED_SECRET: ${ML_SHARED_SECRET:-dev-shared-secret}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+    depends_on:
+      api:
+        condition: service_healthy

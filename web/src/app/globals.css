@@ -1,0 +1,485 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme="dark"] {
+  --bg: #0a0b0c;
+  --bg-elevated: #141618;
+  --bg-soft: #101214;
+  --ink: #f4f1ea;
+  --muted: #9aa3ab;
+  --line: #2c3136;
+  --line-strong: #4a525a;
+  --brand: #e10600;
+  --brand-deep: #a50500;
+  --live: #f0a500;
+  --gain: #2ecc71;
+  --radius: 2px;
+  --header-h: 4rem;
+  --hero-glow: #1a1e22;
+  --hero-media-plate: #0e1012;
+  --hero-stripe: rgba(255, 255, 255, 0.045);
+  --grain-opacity: 0.03;
+}
+
+[data-theme="light"] {
+  --bg: #eceae4;
+  --bg-elevated: #f8f6f2;
+  --bg-soft: #e4e1da;
+  --ink: #101114;
+  --muted: #3d454d;
+  --line: #b9b3a8;
+  --line-strong: #6f675c;
+  --brand: #d10500;
+  --brand-deep: #9a0400;
+  --live: #9a6a00;
+  --gain: #187a42;
+  /* No dark blotch on light canvas */
+  --hero-glow: #e4e1da;
+  /* Portrait sits on a dark bay so light suits don't bleach into the page */
+  --hero-media-plate: #121416;
+  --hero-stripe: rgba(16, 17, 20, 0.04);
+  --grain-opacity: 0.04;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand) 45%, transparent);
+  color: #fff;
+}
+
+@layer components {
+  .font-display {
+    font-family: var(--font-display), Impact, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  .page-wrap {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-white transition;
+    background: var(--brand);
+  }
+
+  .btn-primary:hover {
+    background: var(--brand-deep);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center border px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] transition;
+    border-color: var(--line-strong);
+    color: var(--ink);
+    background: color-mix(in srgb, var(--bg-elevated) 70%, transparent);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--ink);
+    background: var(--bg-elevated);
+  }
+
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.22em];
+    color: var(--muted);
+  }
+
+  .data-table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+
+  .data-table thead tr {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .data-table th {
+    @apply px-3 py-3 text-[11px] font-medium uppercase tracking-[0.16em];
+    color: var(--muted);
+  }
+
+  .data-table td {
+    @apply px-3 py-3 align-middle;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  }
+
+  .data-table tbody tr {
+    transition: background-color 120ms ease;
+  }
+
+  .data-table tbody tr:hover {
+    background: var(--bg-elevated);
+  }
+
+  /* Hero portrait bay — dark plate in both themes so photos stay readable */
+  .hero-media-bay {
+    background: var(--hero-media-plate);
+  }
+
+  .hero-media-bay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* Keep the fade on the empty left of *right.webp — don't eat the driver. */
+    background: linear-gradient(
+      90deg,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 70%, transparent) 10%,
+      color-mix(in srgb, var(--bg) 22%, transparent) 22%,
+      transparent 38%
+    );
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-hero-rise {
+  animation: hero-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-hero-rise-delay {
+  animation: hero-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.animate-hero-media {
+  animation: hero-fade 1.1s ease both;
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-row-in {
+  animation: row-in 0.45s ease both;
+}
+
+/* —— Wow layer: stages, grit, motion —— */
+
+.team-halftone {
+  position: relative;
+  overflow: hidden;
+}
+
+.team-halftone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.12;
+  background-image: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 0.65) 0.85px,
+    transparent 1.15px
+  );
+  background-size: 5px 5px;
+  mix-blend-mode: multiply;
+}
+
+.team-halftone > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes car-slide {
+  from {
+    opacity: 0;
+    transform: translateX(12%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-car-slide {
+  animation: car-slide 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Hover: car drives off forward, re-enters from behind */
+@keyframes car-drive-by {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  40% {
+    transform: translateX(118%) scale(1.03);
+    opacity: 1;
+  }
+  45% {
+    transform: translateX(130%) scale(1.03);
+    opacity: 0;
+  }
+  46% {
+    transform: translateX(-130%) scale(0.98);
+    opacity: 0;
+  }
+  52% {
+    transform: translateX(-118%) scale(0.98);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.car-drive-track {
+  overflow: hidden;
+}
+
+.car-drive {
+  /* Soft fade only on the extreme shadow fringe — keep tires intact */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 92%,
+    rgba(0, 0, 0, 0.55) 97%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 92%,
+    rgba(0, 0, 0, 0.55) 97%,
+    transparent 100%
+  );
+}
+
+.group:hover .car-drive,
+.group:focus-visible .car-drive {
+  animation: car-drive-by 1.85s cubic-bezier(0.4, 0.05, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .car-drive,
+  .group:focus-visible .car-drive {
+    animation: none;
+  }
+}
+
+@keyframes pack-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.018);
+  }
+}
+
+.animate-pack-breathe {
+  animation: pack-breathe 8s ease-in-out infinite;
+}
+
+.portrait-hover {
+  transition:
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 280ms ease;
+}
+
+.group:hover .portrait-hover,
+.group:focus-visible .portrait-hover {
+  transform: scale(1.04);
+  filter: brightness(1.06);
+}
+
+.stage-card {
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease,
+    filter 220ms ease;
+}
+
+.stage-card:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.05);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+/* Mirror / glass driver chips on team stages */
+.mirror-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.06) 48%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 8px 20px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.group:hover .mirror-chip {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+}
+
+.mirror-chip-photo {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.35rem;
+  height: 2.35rem;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.stat-wall {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.track-outline-path {
+  transition: stroke 160ms ease;
+}
+
+.group:hover .track-outline-path {
+  stroke: var(--brand);
+}
+
+.group:hover .track-outline-glow {
+  opacity: 0.45;
+}
+
+.stat-wall dt {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stat-wall dd {
+  font-family: var(--font-display), Impact, sans-serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+@keyframes loader-car-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-car-spin {
+  animation: loader-car-spin 1.15s linear infinite;
+  will-change: transform;
+}
+
+/* White car silhouette — invert on light theme so it stays visible */
+.loader-car-img {
+  filter: none;
+}
+
+html[data-theme="light"] .loader-car-img {
+  filter: invert(1);
+}
+
+@keyframes loader-dots {
+  0%,
+  20% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.25;
+  }
+}
+
+.loader-dots {
+  animation: loader-dots 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-car-spin {
+    animation: none;
+  }
+
+  .loader-dots {
+    animation: none;
+  }
+}

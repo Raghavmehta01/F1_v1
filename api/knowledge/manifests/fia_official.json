@@ -1,0 +1,77 @@
+{
+  "publisher": "Fédération Internationale de l'Automobile (FIA)",
+  "hub": "https://www.fia.com/regulation/category/2182",
+  "note": "Only official FIA PDFs. Update URLs when a newer Issue is published on fia.com.",
+  "documents": [
+    {
+      "id": "fia-2026-section-a",
+      "title": "FIA 2026 F1 Regulations — Section A [General Provisions]",
+      "section": "A",
+      "issue": "03",
+      "date": "2026-06-25",
+      "url": "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_a_general_provisions_-_iss_03_-_2026-06-25.pdf",
+      "filename": "fia_2026_section_a_general_iss03.pdf",
+      "priority": 1
+    },
+    {
+      "id": "fia-2026-section-b",
+      "title": "FIA 2026 F1 Regulations — Section B [Sporting]",
+      "section": "B",
+      "issue": "09",
+      "date": "2026-10-01",
+      "url": "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_b_sporting_-_iss_09_-_2026-10-01.pdf",
+      "filename": "fia_2026_section_b_sporting_iss09.pdf",
+      "priority": 1
+    },
+    {
+      "id": "fia-2026-section-c",
+      "title": "FIA 2026 F1 Regulations — Section C [Technical]",
+      "section": "C",
+      "issue": "21",
+      "date": "2026-10-19",
+      "url": "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_c_technical_-_iss_21_-_2026-10-19.pdf",
+      "filename": "fia_2026_section_c_technical_iss21.pdf",
+      "priority": 1
+    },
+    {
+      "id": "fia-2026-section-d",
+      "title": "FIA 2026 F1 Regulations — Section D [Financial — F1 Teams]",
+      "section": "D",
+      "issue": "08",
+      "date": "2026-10-01",
+      "url": "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_d_financial_-_f1_teams_-_iss_08_-_2026-10-01.pdf",
+      "filename": "fia_2026_section_d_financial_teams_iss08.pdf",
+      "priority": 2
+    },
+    {
+      "id": "fia-2026-section-e",
+      "title": "FIA 2026 F1 Regulations — Section E [Financial — PU Manufacturers]",
+      "section": "E",
+      "issue": "07",
+      "date": "2026-10-19",
+      "url": "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_e_financial_-_pu_manufacturers_-_iss_07_-_2026-10-19.pdf",
+      "filename": "fia_2026_section_e_financial_pu_iss07.pdf",
+      "priority": 2
+    },
+    {
+      "id": "fia-2026-section-f",
+      "title": "FIA 2026 F1 Regulations — Section F [Operational]",
+      "section": "F",
+      "issue": "11",
+      "date": "2026-10-01",
+      "url": "https://www.fia.com/system/files/documents/fia_2026_f1_regulations_-_section_f_operational_-_iss_11_-_2026-10-01.pdf",
+      "filename": "fia_2026_section_f_operational_iss11.pdf",
+      "priority": 1
+    },
+    {
+      "id": "fia-isc-2025",
+      "title": "FIA International Sporting Code (FR-EN clean)",
+      "section": "ISC",
+      "issue": "2025",
+      "date": "2025-01-27",
+      "url": "https://www.fia.com/sites/default/files/2025_international_sporting_code_fr-en_0.pdf",
+      "filename": "fia_isc_2025_fr_en.pdf",
+      "priority": 1
+    }
+  ]
+}

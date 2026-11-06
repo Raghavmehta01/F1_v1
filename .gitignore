@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+web/node_modules/
+api/.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+web/.env
+web/.env.local
+api/.env
+
+# Next.js
+web/.next/
+web/out/
+web/build/
+
+# ML artifacts (large / regenerated)
+api/ml/artifacts/*.pkl
+api/ml/artifacts/*.joblib
+api/ml/artifacts/model.*
+!api/ml/artifacts/.gitkeep
+
+# Official FIA PDFs (downloaded) + Chroma vector store
+api/knowledge/official/*.pdf
+api/data/chroma/**
+!api/data/chroma/.gitkeep
+!api/knowledge/official/.gitkeep
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs / coverage
+*.log
+coverage/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Docker
+*.pid
+api/.venv314.bak/
