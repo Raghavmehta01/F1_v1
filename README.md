@@ -1,5 +1,6 @@
 # F1_v1
 
+
 Formula 1 hub: standings, calendar, results, history, ML race predictions, and an agentic chat assistant.
 
 **Brand:** F1_v1 · **Default theme:** dark · **Chat model:** Llama 3.3 70B (Groq) · **ML:** LightGBM (FastAPI)
