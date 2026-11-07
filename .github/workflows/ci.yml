@@ -22,13 +22,18 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
+      - run: npm test
+        env:
+          ML_SHARED_SECRET: ci-secret
+          CHAT_OWNER_TOKEN: ci-owner-token
+          ML_API_URL: http://127.0.0.1:8000
       - run: npm run build
         env:
           ML_SHARED_SECRET: ci-secret
           ML_API_URL: http://127.0.0.1:8000
 
   api:
-    name: API import check
+    name: API tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,7 +43,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt -r requirements-dev.txt
       - run: python -c "from app.main import app; print(app.title)"
         env:
           ML_SHARED_SECRET: ci-secret
+      - run: python -m pytest ../test-suite/api -q
+        env:
+          ML_SHARED_SECRET: ci-secret
+          CORS_ORIGINS: http://localhost:3000

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { PageHeader } from "@/components/PageHeader";
-import { getSeasons } from "@/lib/jolpica";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { getSeasons } from "@/lib/data/jolpica";
 
 export const revalidate = 86400;
 

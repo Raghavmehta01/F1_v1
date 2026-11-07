@@ -1,21 +1,30 @@
 import Link from "next/link";
-import { HeroPack } from "@/components/HeroPack";
-import { HeroRankings } from "@/components/HeroRankings";
-import { RaceStrip } from "@/components/RaceStrip";
-import { TeamStageCard } from "@/components/TeamStageCard";
+import { HeroLeaders } from "@/components/home/HeroLeaders";
+import { HeroNews } from "@/components/home/HeroNews";
+import { HeroPack } from "@/components/home/HeroPack";
+import { HeroRankings } from "@/components/home/HeroRankings";
+import { RaceStrip } from "@/components/home/RaceStrip";
+import { RaceWeekendTimes } from "@/components/home/RaceWeekendTimes";
+import { TeamStageCard } from "@/components/standings/TeamStageCard";
+import { getF1Headlines, type F1Headline } from "@/lib/data/f1-news";
 import {
   getConstructorStandings,
   getDriverStandingsDetailed,
   getLastRace,
   getSeasonCalendar,
   pickFeaturedRace,
-} from "@/lib/jolpica";
-import { fullDriverImage, mediaFromStanding } from "@/lib/media";
-import { getDriverMediaIndex, matchOpenF1Driver } from "@/lib/openf1";
-import { teamColor } from "@/lib/team-colors";
-import type { ConstructorStanding, Race } from "@/lib/types";
+} from "@/lib/data/jolpica";
+import {
+  cloudinaryTeamLogo,
+  fullDriverImage,
+  mediaFromStanding,
+} from "@/lib/media";
+import { getDriverMediaIndex, matchOpenF1Driver } from "@/lib/data/openf1";
+import { raceSessionSlots } from "@/lib/data/race-sessions";
+import { teamColor } from "@/lib/media/team-colors";
+import type { ConstructorStanding, Race } from "@/lib/data/types";
 
-export const revalidate = 60;
+export const revalidate = 120;
 
 export default async function HomePage() {
   let featured: ReturnType<typeof pickFeaturedRace> = null;
@@ -32,21 +41,37 @@ export default async function HomePage() {
     color: string;
     shot: string | null;
   }> = [];
+  let leadDriver: {
+    id: string;
+    name: string;
+    points: string;
+    color: string;
+    shot: string | null;
+  } | null = null;
+  let leadConstructor: {
+    id: string;
+    name: string;
+    points: string;
+    color: string;
+    logo: string | null;
+  } | null = null;
   let allDriverStandings: Awaited<
     ReturnType<typeof getDriverStandingsDetailed>
   >["standings"] = [];
   let media: Awaited<ReturnType<typeof getDriverMediaIndex>> | null = null;
+  let headlines: F1Headline[] = [];
 
   try {
-    const [racesRes, detailed, lastRace, mediaRes, ctorRes] = await Promise.all(
-      [
+    const [racesRes, detailed, lastRace, mediaRes, ctorRes, newsRes] =
+      await Promise.all([
         getSeasonCalendar("current"),
         getDriverStandingsDetailed("current"),
         getLastRace("current"),
         getDriverMediaIndex().catch(() => null),
         getConstructorStandings("current").catch(() => []),
-      ],
-    );
+        getF1Headlines(14).catch(() => [] as F1Headline[]),
+      ]);
+    headlines = newsRes;
 
     races = racesRes;
     constructors = ctorRes.slice(0, 4);
@@ -89,6 +114,33 @@ export default async function HomePage() {
         ),
       };
     });
+
+    const d1 = topDrivers[0];
+    if (d1) {
+      leadDriver = {
+        id: d1.id,
+        name: d1.name,
+        points: d1.points,
+        color: d1.color,
+        shot: d1.shot,
+      };
+    }
+
+    const c1 = ctorRes[0];
+    if (c1) {
+      leadConstructor = {
+        id: c1.Constructor.constructorId,
+        name: c1.Constructor.name,
+        points: c1.points,
+        color: teamColor(c1.Constructor.constructorId),
+        logo: cloudinaryTeamLogo({
+          constructorId: c1.Constructor.constructorId,
+          teamName: c1.Constructor.name,
+          width: 96,
+          variant: "white",
+        }),
+      };
+    }
   } catch {
     featured = null;
   }
@@ -99,9 +151,8 @@ export default async function HomePage() {
     : standingsSeason
       ? `${standingsSeason} season`
       : "";
-  const raceHref = featured
-    ? `/races/${featured.race.season}/${featured.race.round}`
-    : "/calendar";
+  const sessions =
+    featured?.status === "upcoming" ? raceSessionSlots(featured.race) : [];
 
   const byTeam = new Map<string, typeof allDriverStandings>();
   for (const d of allDriverStandings) {
@@ -128,45 +179,56 @@ export default async function HomePage() {
           aria-hidden
         />
 
-        <div className="page-wrap relative z-10 grid min-h-[calc(100svh-4rem)] grid-cols-1 items-center gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)_auto] lg:gap-8 xl:gap-10">
-          <div className="min-w-0 space-y-7">
-            <p className="font-display animate-hero-rise text-[clamp(3.5rem,10vw,6.5rem)] leading-[0.85] text-[var(--ink)]">
-              F1_v1
-            </p>
-            <div className="animate-hero-rise-delay space-y-3">
-              <p className="eyebrow !text-[var(--brand)]">
-                {featured?.status === "upcoming" ? "Next up" : "Latest"}
+        <div className="relative z-10 flex h-[calc(100svh-4rem)] max-h-[calc(100svh-4rem)] overflow-hidden">
+          <div className="flex min-h-0 w-full min-w-0 flex-col justify-between gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:w-[min(34rem,38%)] lg:shrink-0 lg:px-8 lg:py-12 xl:w-[min(36rem,36%)] xl:pl-12">
+            <div className="flex min-w-0 flex-col space-y-4">
+              <p className="font-display animate-hero-rise text-[clamp(3.25rem,9vw,5.75rem)] leading-[0.85] text-[var(--ink)]">
+                F1_v1
               </p>
-              <h1 className="font-display text-3xl leading-none tracking-tight text-[var(--ink)] sm:text-4xl xl:text-5xl">
-                {raceName}
-              </h1>
-              <p className="max-w-sm text-sm leading-relaxed text-[var(--muted)] sm:text-base">
-                {raceMeta}. After round {standingsRound}
-                {lastRaceLabel ? ` · ${lastRaceLabel}` : ""}.
-              </p>
+              <div className="animate-hero-rise-delay space-y-2">
+                <p className="eyebrow !text-[var(--brand)]">
+                  {featured?.status === "upcoming" ? "Next up" : "Latest"}
+                </p>
+                <h1 className="font-display text-3xl leading-none tracking-tight text-[var(--ink)] sm:text-4xl">
+                  {raceName}
+                </h1>
+                <p className="max-w-lg text-sm leading-relaxed text-[var(--muted)]">
+                  {raceMeta}
+                  {lastRaceLabel ? ` · ${lastRaceLabel}` : ""}
+                </p>
+              </div>
             </div>
-            <div className="animate-hero-rise-delay flex flex-wrap gap-3">
-              <Link href="/standings" className="btn-primary">
-                Standings
-              </Link>
-              <Link href={raceHref} className="btn-ghost">
-                {featured?.status === "upcoming" ? "Race weekend" : "Results"}
-              </Link>
-              <Link href="/live" className="btn-ghost">
-                Timing
-              </Link>
-            </div>
+
+            {sessions.length ? (
+              <RaceWeekendTimes sessions={sessions} />
+            ) : (
+              <div className="flex-1" aria-hidden />
+            )}
+
+            <HeroLeaders
+              driver={leadDriver}
+              constructor={leadConstructor}
+              round={standingsRound}
+              season={standingsSeason}
+            />
           </div>
 
-          <HeroRankings
-            drivers={topDrivers}
-            round={standingsRound}
-            season={standingsSeason}
-          />
-
+          <HeroNews items={headlines} />
           <HeroPack />
         </div>
       </section>
+
+      {topDrivers.length ? (
+        <section className="border-t border-[var(--line)]">
+          <div className="page-wrap py-12 sm:py-14">
+            <HeroRankings
+              drivers={topDrivers}
+              round={standingsRound}
+              season={standingsSeason}
+            />
+          </div>
+        </section>
+      ) : null}
 
       <RaceStrip races={races} featuredRound={featured?.race.round} />
 

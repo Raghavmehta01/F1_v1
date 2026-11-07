@@ -25,6 +25,8 @@ services:
       ML_API_URL: http://api:8000
       ML_SHARED_SECRET: ${ML_SHARED_SECRET:-dev-shared-secret}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
+      CHAT_PROMPTS_LIMIT: ${CHAT_PROMPTS_LIMIT:-5}
+      CHAT_OWNER_TOKEN: ${CHAT_OWNER_TOKEN:-}
     depends_on:
       api:
         condition: service_healthy

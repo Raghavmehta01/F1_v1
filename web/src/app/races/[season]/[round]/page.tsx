@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { CircuitThumb } from "@/components/CircuitThumb";
-import { PageHeader } from "@/components/PageHeader";
-import { QualifyingTable, RaceResultsTable } from "@/components/ResultsTable";
-import { getQualifying, getRaceResults } from "@/lib/jolpica";
-import { getDriverMediaIndex } from "@/lib/openf1";
-import { parseRound, parseSeason } from "@/lib/validation";
+import { CircuitThumb } from "@/components/race/CircuitThumb";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { RaceWeekendTabs } from "@/components/race/RaceWeekendTabs";
+import { getRaceWeekend } from "@/lib/data/jolpica";
+import { getWeekendPracticeBoards } from "@/lib/data/openf1-live";
+import { getDriverMediaIndex } from "@/lib/data/openf1";
+import { parseRound, parseSeason } from "@/lib/security/validation";
 import { notFound } from "next/navigation";
 
 export const revalidate = 120;
@@ -19,20 +20,19 @@ export default async function RacePage({ params }: Props) {
   const round = parseRound(r);
   if (season == null || round == null) notFound();
 
-  const [race, quali, media] = await Promise.all([
-    getRaceResults(season, round),
-    getQualifying(season, round).catch(() => null),
+  const [weekend, media] = await Promise.all([
+    getRaceWeekend(season, round),
     getDriverMediaIndex().catch(() => null),
   ]);
 
-  const meta = race ?? quali;
+  const meta = weekend.meta;
   if (!meta) {
     return (
       <div className="page-wrap space-y-6 py-16">
         <PageHeader
           eyebrow={`${season} · Round ${round}`}
           title="No results yet"
-          description="This weekend has not been published to the results feed."
+          description="Results for this weekend are not available yet."
         />
         <Link href="/calendar" className="btn-ghost inline-flex">
           Back to calendar
@@ -40,6 +40,10 @@ export default async function RacePage({ params }: Props) {
       </div>
     );
   }
+
+  const practices = await getWeekendPracticeBoards(
+    weekend.schedule ?? meta,
+  ).catch(() => []);
 
   return (
     <div className="page-wrap space-y-12 py-12 sm:py-16">
@@ -71,15 +75,14 @@ export default async function RacePage({ params }: Props) {
         </div>
       </header>
 
-      <section className="space-y-5">
-        <h2 className="eyebrow">Race</h2>
-        <RaceResultsTable rows={race?.Results ?? []} media={media} />
-      </section>
-
-      <section className="space-y-5">
-        <h2 className="eyebrow">Qualifying</h2>
-        <QualifyingTable rows={quali?.QualifyingResults ?? []} media={media} />
-      </section>
+      <RaceWeekendTabs
+        schedule={weekend.schedule}
+        race={weekend.race}
+        quali={weekend.quali}
+        sprint={weekend.sprint}
+        practices={practices}
+        media={media}
+      />
     </div>
   );
 }

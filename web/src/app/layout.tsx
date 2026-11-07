@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
+import { IntroRadioSound } from "@/components/layout/IntroRadioSound";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import "./globals.css";
 
 const display = Archivo_Black({
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s · F1_v1",
   },
   description:
-    "Formula 1 standings, results, history, predictions, and an agentic race chat.",
+    "Formula 1 standings, results, live timing, history, and race chat.",
 };
 
 export default function RootLayout({
@@ -47,6 +48,7 @@ export default function RootLayout({
     >
       <body className="relative flex min-h-full flex-col overflow-x-hidden">
         <ThemeProvider>
+          <IntroRadioSound />
           <Header />
           <main className="relative z-0 flex-1">{children}</main>
           <Footer />

@@ -8,18 +8,38 @@ from typing import Any
 
 import httpx
 
+from app.chat.cache import cache_key, stats_cache
 from app.chat.rag import search_regulations
 
 JOLPICA = "https://api.jolpi.ca/ergast/f1"
 UA = "F1_v1-chat/0.1 (educational; +https://localhost)"
 
+_http: httpx.Client | None = None
+
+
+def _http_client() -> httpx.Client:
+    global _http
+    if _http is None:
+        _http = httpx.Client(
+            timeout=httpx.Timeout(8.0, connect=3.0),
+            headers={"User-Agent": UA},
+            follow_redirects=True,
+            limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
+        )
+    return _http
+
 
 def _get(path: str) -> dict[str, Any]:
+    key = cache_key("jolpica", path)
+    cached = stats_cache.get(key)
+    if cached is not None:
+        return json.loads(cached)
     url = f"{JOLPICA}/{path.lstrip('/')}"
-    with httpx.Client(timeout=25.0, headers={"User-Agent": UA}) as client:
-        res = client.get(url)
-        res.raise_for_status()
-        return res.json()
+    res = _http_client().get(url)
+    res.raise_for_status()
+    data = res.json()
+    stats_cache.set(key, json.dumps(data))
+    return data
 
 
 def _excerpt(text: str | None, limit: int = 450, prefer: str | None = None) -> str:

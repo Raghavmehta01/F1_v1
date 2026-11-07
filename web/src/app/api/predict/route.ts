@@ -1,5 +1,5 @@
 import { clientIp, rateLimit, safeFetch } from "@/lib/security";
-import { parseRound, parseSeason } from "@/lib/validation";
+import { parseRound, parseSeason } from "@/lib/security/validation";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {

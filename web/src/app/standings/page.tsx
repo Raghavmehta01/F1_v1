@@ -1,19 +1,19 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { CarLoader } from "@/components/CarLoader";
-import { DriverStageGrid } from "@/components/DriverStageCard";
-import { PageHeader } from "@/components/PageHeader";
-import { StandingsTabs } from "@/components/StandingsTabs";
-import { TeamStageGrid } from "@/components/TeamStageCard";
+import { CarLoader } from "@/components/ui/CarLoader";
+import { DriverStageGrid } from "@/components/standings/DriverStageCard";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { StandingsTabs } from "@/components/standings/StandingsTabs";
+import { TeamStageGrid } from "@/components/standings/TeamStageCard";
 import {
   getActiveSeasonYear,
   getConstructorStandings,
   getDriverStandingsDetailed,
   getLastRace,
   getSeasons,
-} from "@/lib/jolpica";
-import { getDriverMediaIndex, matchOpenF1Driver } from "@/lib/openf1";
-import { parseSeason } from "@/lib/validation";
+} from "@/lib/data/jolpica";
+import { getDriverMediaIndex, matchOpenF1Driver } from "@/lib/data/openf1";
+import { parseSeason } from "@/lib/security/validation";
 
 export const revalidate = 60;
 

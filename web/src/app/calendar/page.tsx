@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { CircuitMini } from "@/components/CircuitMini";
-import { PageHeader } from "@/components/PageHeader";
-import { getActiveSeasonYear, getSeasonCalendar } from "@/lib/jolpica";
-import { parseSeason } from "@/lib/validation";
+import { CircuitMini } from "@/components/race/CircuitMini";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { getActiveSeasonYear, getSeasonCalendar } from "@/lib/data/jolpica";
+import { parseSeason } from "@/lib/security/validation";
 
 export const revalidate = 120;
 
@@ -22,7 +22,7 @@ export default async function CalendarPage({ searchParams }: Props) {
       <PageHeader
         eyebrow="Season map"
         title="Calendar"
-        description={`Every ${season} race weekend — circuit outline follows your theme.`}
+        description={`Every ${season} race weekend on the championship calendar.`}
       />
 
       <ol className="divide-y divide-[var(--line)] border-y border-[var(--line)]">

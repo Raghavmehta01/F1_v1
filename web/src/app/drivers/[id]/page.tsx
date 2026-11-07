@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { SafeImage } from "@/components/SafeImage";
-import { StatWall } from "@/components/StatWall";
-import { getDriver, getDriverStandingsDetailed } from "@/lib/jolpica";
+import { SafeImage } from "@/components/ui/SafeImage";
+import { StatWall } from "@/components/home/StatWall";
+import { getDriver, getDriverStandingsDetailed } from "@/lib/data/jolpica";
 import { fullDriverImage, mediaFromStanding } from "@/lib/media";
-import { getDriverMediaIndex, matchOpenF1Driver } from "@/lib/openf1";
-import { teamStageFill, teamStageInk } from "@/lib/team-colors";
-import { parseId } from "@/lib/validation";
+import { getDriverMediaIndex, matchOpenF1Driver } from "@/lib/data/openf1";
+import { teamStageFill, teamStageInk } from "@/lib/media/team-colors";
+import { parseId } from "@/lib/security/validation";
 import { notFound } from "next/navigation";
 
 export const revalidate = 120;

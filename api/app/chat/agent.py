@@ -1,39 +1,43 @@
-"""Groq agent with official-reg RAG + live stats tools (token-budget aware)."""
+"""Fast Groq RAG agent — cached, coalesced, parallel-safe."""
 
 from __future__ import annotations
 
 import json
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from groq import Groq
 
+from app.chat.cache import (
+    answer_cache,
+    answer_flight,
+    cache_key,
+    normalize_query,
+)
 from app.chat.rag import collection_count
-from app.chat.tools import TOOL_SPECS, run_tool, tool_search_official_regulations
+from app.chat.tools import (
+    TOOL_SPECS,
+    run_tool,
+    tool_constructor_standings,
+    tool_driver_standings,
+    tool_last_race_results,
+    tool_search_official_regulations,
+    tool_season_calendar,
+)
 
-MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
-MAX_TOOL_ROUNDS = 1
-MAX_COMPLETION_TOKENS = int(os.getenv("GROQ_MAX_TOKENS", "500"))
-HISTORY_TURNS = 2
-MSG_CHAR_CAP = 700
-TOOL_RESULT_CAP = 1600
-
-SYSTEM_PROMPT = """You are F1_v1 Pit Wall.
-
-For live standings/results/calendar only: call the Jolpica tools.
-Regulation answers are already provided as evidence — do not invent articles.
-
-Format (strict):
-- Plain prose only. No markdown (#, **, __, bullets with *).
-- 1 short title line, then 1–3 short paragraphs.
-- One citation line at the end: Section X · Iss Y · p.Z
-
-Not affiliated with F1 or the FIA."""
+# Fast Groq chat model with real `content` (gpt-oss often leaves content empty).
+MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
+MAX_COMPLETION_TOKENS = int(os.getenv("GROQ_MAX_TOKENS", "320"))
+HISTORY_TURNS = 1
+MSG_CHAR_CAP = 500
+TOOL_RESULT_CAP = 1200
+RAG_HITS = 2
 
 FINAL_SYSTEM = """You are F1_v1 Pit Wall. Answer using ONLY the evidence below.
-Plain prose, no markdown. Short title, 1–3 short paragraphs, one citation line
-(Section · Iss · p.). Prefer Section B Sporting excerpts for flags/session procedures.
+Plain prose, no markdown. Short title, 1-2 short paragraphs, one citation line
+(Section · Iss · p.). Prefer Section B for flags/session procedures.
 Not affiliated with F1/FIA."""
 
 _RULE_RE = re.compile(
@@ -45,16 +49,23 @@ _RULE_RE = re.compile(
 )
 _STATS_RE = re.compile(
     r"\b(standing|championship|points|winner|result|calendar|who won|"
-    r"leader|rank|podium|race weekend)\b",
+    r"leader|rank|podium|race weekend|constructor)\b",
     re.I,
 )
 
+_groq: Groq | None = None
+_pool = ThreadPoolExecutor(max_workers=8, thread_name_prefix="f1chat")
+
 
 def _client() -> Groq:
+    global _groq
+    if _groq is not None:
+        return _groq
     key = os.getenv("GROQ_API_KEY", "").strip()
     if not key:
         raise RuntimeError("GROQ_API_KEY is not configured")
-    return Groq(api_key=key)
+    _groq = Groq(api_key=key, max_retries=1, timeout=20.0)
+    return _groq
 
 
 def _trim(text: str, n: int = MSG_CHAR_CAP) -> str:
@@ -71,6 +82,8 @@ def _unique_sources(sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
             continue
         seen.add(key)
         out.append(s)
+        if len(out) >= 3:
+            break
     return out
 
 
@@ -79,33 +92,31 @@ def _sources_from_reg_payload(raw: str) -> list[dict[str, Any]]:
         data = json.loads(raw)
     except json.JSONDecodeError:
         return []
-    out = []
-    for hit in data.get("hits") or []:
-        out.append(
-            {
-                "title": hit.get("title"),
-                "section": hit.get("section"),
-                "issue": hit.get("issue"),
-                "page": hit.get("page"),
-                "url": hit.get("url"),
-            }
-        )
-    return out
+    return [
+        {
+            "title": hit.get("title"),
+            "section": hit.get("section"),
+            "issue": hit.get("issue"),
+            "page": hit.get("page"),
+            "url": hit.get("url"),
+        }
+        for hit in data.get("hits") or []
+    ]
 
 
-def _evidence_pack(tool_payloads: list[str], sources: list[dict[str, Any]]) -> str:
+def _evidence_pack(tool_payloads: list[str]) -> str:
     bits: list[str] = []
     for raw in tool_payloads[-4:]:
         try:
             data = json.loads(raw)
         except json.JSONDecodeError:
-            bits.append(_trim(raw, 500))
+            bits.append(_trim(raw, 400))
             continue
         if "hits" in data:
-            for h in (data.get("hits") or [])[:3]:
+            for h in (data.get("hits") or [])[:RAG_HITS]:
                 bits.append(
                     f"Sec {h.get('section')} Iss {h.get('issue')} p.{h.get('page')}: "
-                    f"{_trim(str(h.get('excerpt') or ''), 380)}"
+                    f"{_trim(str(h.get('excerpt') or ''), 300)}"
                 )
         elif "standings" in data:
             rows = data.get("standings") or []
@@ -128,64 +139,56 @@ def _evidence_pack(tool_payloads: list[str], sources: list[dict[str, Any]]) -> s
                 "Calendar: "
                 + "; ".join(
                     f"R{r.get('round')} {r.get('raceName')} {r.get('date')}"
-                    for r in (data.get("races") or [])[:12]
+                    for r in (data.get("races") or [])[:10]
                 )
             )
         else:
-            bits.append(_trim(raw, 400))
-
-    if not bits and sources:
-        for s in sources[:3]:
-            bits.append(
-                f"Sec {s.get('section')} Iss {s.get('issue')} p.{s.get('page')} "
-                f"({s.get('title')})"
-            )
-    return "\n".join(bits)[:2400]
+            bits.append(_trim(raw, 350))
+    return "\n".join(bits)[:1800]
 
 
 def _fallback_from_evidence(evidence: str, sources: list[dict[str, Any]]) -> str:
     if not evidence.strip():
-        return (
-            "I could not complete the answer under the current Groq token limit. "
-            "Try a narrower question."
-        )
+        return "Could not finish under the current token budget. Ask a narrower question."
     cite = ""
     if sources:
         s = sources[0]
         cite = (
             f"\n\nSection {s.get('section')} · Iss {s.get('issue')} · p.{s.get('page')}"
         )
-    lines = [ln.strip() for ln in evidence.split("\n") if ln.strip()][:2]
-    body = _trim(" ".join(lines), 900)
-    return f"Official excerpt\n\n{body}{cite}"
+    line = next((ln for ln in evidence.split("\n") if ln.strip()), "")
+    return f"Official excerpt\n\n{_trim(line, 700)}{cite}"
 
 
 def _finalize(
-    client: Groq,
     question: str,
     tool_payloads: list[str],
     sources: list[dict[str, Any]],
 ) -> str:
-    evidence = _evidence_pack(tool_payloads, sources)
+    evidence = _evidence_pack(tool_payloads)
     compact = [
         {"role": "system", "content": FINAL_SYSTEM},
         {
             "role": "user",
             "content": (
-                f"Question: {_trim(question, 400)}\n\n"
+                f"Question: {_trim(question, 300)}\n\n"
                 f"Evidence:\n{evidence}\n\n"
                 "Write the answer now."
             ),
         },
     ]
     try:
-        completion = client.chat.completions.create(
+        completion = _client().chat.completions.create(
             model=MODEL,
             messages=compact,
-            temperature=0.2,
+            temperature=0.1,
             max_tokens=MAX_COMPLETION_TOKENS,
         )
-        answer = (completion.choices[0].message.content or "").strip()
+        msg = completion.choices[0].message
+        answer = (msg.content or "").strip()
+        if not answer:
+            # Some Groq models only fill `reasoning`
+            answer = (getattr(msg, "reasoning", None) or "").strip()
         if answer:
             return answer
     except Exception:
@@ -193,28 +196,54 @@ def _finalize(
     return _fallback_from_evidence(evidence, _unique_sources(sources))
 
 
-def run_chat(
+def _prefetch_stats(question: str) -> list[str]:
+    """Fetch likely Jolpica payloads in parallel (cached)."""
+    q = question.lower()
+    jobs: dict[str, Any] = {}
+    if "constructor" in q:
+        jobs["constructors"] = tool_constructor_standings
+    if any(w in q for w in ("standing", "championship", "leader", "points", "rank")):
+        jobs["drivers"] = tool_driver_standings
+    if any(w in q for w in ("last race", "winner", "who won", "result")):
+        jobs["last"] = tool_last_race_results
+    if "calendar" in q or "schedule" in q:
+        jobs["calendar"] = tool_season_calendar
+
+    if not jobs:
+        # generic stats ask — pull drivers + last race
+        jobs["drivers"] = tool_driver_standings
+        jobs["last"] = tool_last_race_results
+
+    out: list[str] = []
+    futures = {_pool.submit(fn): name for name, fn in jobs.items()}
+    for fut in as_completed(futures, timeout=10):
+        try:
+            out.append(fut.result()[:TOOL_RESULT_CAP])
+        except Exception as e:
+            out.append(json.dumps({"error": str(e), "tool": futures[fut]}))
+    return out
+
+
+def _run_chat_uncached(
     message: str,
-    history: list[dict[str, str]] | None = None,
+    history: list[dict[str, str]] | None,
 ) -> dict[str, Any]:
     indexed = collection_count()
     if indexed == 0:
         return {
             "answer": (
                 "Official FIA regulations are not ingested yet. "
-                "Run knowledge ingest first (POST /chat/ingest or "
-                "`python -m scripts.ingest_official`)."
+                "Run knowledge ingest first."
             ),
             "sources": [],
             "model": MODEL,
             "tool_calls": [],
             "status": "needs_ingest",
             "collection_count": 0,
+            "cached": False,
         }
 
-    client = _client()
-    history = history or []
-    question = _trim(message, 1200)
+    question = _trim(message, 900)
     is_rules = bool(_RULE_RE.search(question))
     wants_stats = bool(_STATS_RE.search(question))
 
@@ -222,18 +251,22 @@ def run_chat(
     tool_trace: list[dict[str, Any]] = []
     tool_payloads: list[str] = []
 
-    # Always seed rules questions with our own Chroma search (stable query, not the model's).
-    if is_rules or not wants_stats:
-        seeded = tool_search_official_regulations(question, n_results=3)
+    # Parallel prefetch when both rules + stats, else specialized fast paths
+    if is_rules and wants_stats:
+        fut_reg = _pool.submit(
+            tool_search_official_regulations, question, RAG_HITS
+        )
+        fut_stats = _pool.submit(_prefetch_stats, question)
+        seeded = fut_reg.result(timeout=15)
         tool_payloads.append(seeded)
         sources.extend(_sources_from_reg_payload(seeded))
         tool_trace.append(
             {"name": "search_official_regulations", "arguments": {"query": question}}
         )
-
-    # Rules-only: skip tool loop — finalize from seeded evidence (fits free-tier TPM).
-    if is_rules and not wants_stats:
-        answer = _finalize(client, question, tool_payloads, sources)
+        stats = fut_stats.result(timeout=12)
+        tool_payloads.extend(stats)
+        tool_trace.append({"name": "prefetch_stats", "arguments": {}})
+        answer = _finalize(question, tool_payloads, sources)
         return {
             "answer": answer,
             "sources": _unique_sources(sources),
@@ -241,88 +274,87 @@ def run_chat(
             "tool_calls": tool_trace,
             "status": "ok",
             "collection_count": indexed,
+            "cached": False,
         }
 
-    messages: list[dict[str, Any]] = [{"role": "system", "content": SYSTEM_PROMPT}]
-    for turn in history[-HISTORY_TURNS:]:
-        role = turn.get("role")
-        content = _trim(turn.get("content") or "", 400)
-        if role in ("user", "assistant") and content:
-            messages.append({"role": role, "content": content})
-    if tool_payloads:
-        messages.append(
-            {
-                "role": "user",
-                "content": (
-                    f"{question}\n\n"
-                    f"Regulation evidence already retrieved:\n"
-                    f"{_evidence_pack(tool_payloads, sources)[:1200]}"
-                ),
-            }
+    if is_rules:
+        seeded = tool_search_official_regulations(question, n_results=RAG_HITS)
+        tool_payloads.append(seeded)
+        sources.extend(_sources_from_reg_payload(seeded))
+        tool_trace.append(
+            {"name": "search_official_regulations", "arguments": {"query": question}}
         )
-    else:
-        messages.append({"role": "user", "content": question})
+        answer = _finalize(question, tool_payloads, sources)
+        return {
+            "answer": answer,
+            "sources": _unique_sources(sources),
+            "model": MODEL,
+            "tool_calls": tool_trace,
+            "status": "ok",
+            "collection_count": indexed,
+            "cached": False,
+        }
 
-    for _ in range(MAX_TOOL_ROUNDS):
-        try:
-            completion = client.chat.completions.create(
-                model=MODEL,
-                messages=messages,
-                tools=TOOL_SPECS,
-                tool_choice="auto",
-                temperature=0.2,
-                max_tokens=min(MAX_COMPLETION_TOKENS, 350),
-            )
-        except Exception:
-            break
+    if wants_stats:
+        tool_payloads.extend(_prefetch_stats(question))
+        tool_trace.append({"name": "prefetch_stats", "arguments": {}})
+        answer = _finalize(question, tool_payloads, sources)
+        return {
+            "answer": answer,
+            "sources": [],
+            "model": MODEL,
+            "tool_calls": tool_trace,
+            "status": "ok",
+            "collection_count": indexed,
+            "cached": False,
+        }
 
+    # Fallback: seed regs + one optional tool round (rare)
+    seeded = tool_search_official_regulations(question, n_results=RAG_HITS)
+    tool_payloads.append(seeded)
+    sources.extend(_sources_from_reg_payload(seeded))
+    tool_trace.append(
+        {"name": "search_official_regulations", "arguments": {"query": question}}
+    )
+
+    # Tiny optional tool call only if clearly needs live data miss
+    history = history or []
+    _ = history  # history unused for cacheable lightweight path
+    try:
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "Call a Jolpica tool only if the question needs live standings/"
+                    "results/calendar. Otherwise reply with NO_TOOL."
+                ),
+            },
+            {"role": "user", "content": question},
+        ]
+        completion = _client().chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            tools=TOOL_SPECS,
+            tool_choice="auto",
+            temperature=0.1,
+            max_tokens=120,
+        )
         choice = completion.choices[0].message
-        tool_calls = choice.tool_calls or []
-
-        if not tool_calls:
-            answer = (choice.content or "").strip()
-            if answer:
-                return {
-                    "answer": answer,
-                    "sources": _unique_sources(sources),
-                    "model": MODEL,
-                    "tool_calls": tool_trace,
-                    "status": "ok",
-                    "collection_count": indexed,
-                }
-            break
-
-        for tc in tool_calls:
+        for tc in choice.tool_calls or []:
             name = tc.function.name
+            if name == "search_official_regulations":
+                continue
             try:
                 args = json.loads(tc.function.arguments or "{}")
             except json.JSONDecodeError:
                 args = {}
-            if name == "search_official_regulations":
-                # Prefer already-seeded search; skip duplicate if present
-                if any(
-                    t.get("name") == "search_official_regulations" for t in tool_trace
-                ):
-                    continue
-                args["n_results"] = min(int(args.get("n_results") or 3), 3)
             result = run_tool(name, args)
-            clipped = result[:TOOL_RESULT_CAP]
-            tool_payloads.append(clipped)
+            tool_payloads.append(result[:TOOL_RESULT_CAP])
             tool_trace.append({"name": name, "arguments": args})
-            if name == "search_official_regulations":
-                sources.extend(_sources_from_reg_payload(result))
+    except Exception:
+        pass
 
-        answer = _finalize(client, question, tool_payloads, sources)
-        return {
-            "answer": answer,
-            "sources": _unique_sources(sources),
-            "model": MODEL,
-            "tool_calls": tool_trace,
-            "status": "ok",
-            "collection_count": indexed,
-        }
-
-    answer = _finalize(client, question, tool_payloads, sources)
+    answer = _finalize(question, tool_payloads, sources)
     return {
         "answer": answer,
         "sources": _unique_sources(sources),
@@ -330,4 +362,42 @@ def run_chat(
         "tool_calls": tool_trace,
         "status": "ok",
         "collection_count": indexed,
+        "cached": False,
     }
+
+
+def run_chat(
+    message: str,
+    history: list[dict[str, str]] | None = None,
+) -> dict[str, Any]:
+    """Public entry: TTL answer cache + single-flight coalescing."""
+    qn = normalize_query(message)
+    # Rules answers ignore history for cache hits (stable FIA text).
+    # Stats include a coarse history fingerprint only when present.
+    hist_fp = ""
+    if history:
+        last = history[-1]
+        hist_fp = normalize_query((last.get("content") or "")[:80])
+    key = cache_key("ans", MODEL, qn, hist_fp)
+
+    hit = answer_cache.get(key)
+    if hit is not None:
+        out = dict(hit)
+        out["cached"] = True
+        return out
+
+    def compute() -> dict[str, Any]:
+        # Double-check after winning the flight
+        again = answer_cache.get(key)
+        if again is not None:
+            out = dict(again)
+            out["cached"] = True
+            return out
+        result = _run_chat_uncached(message, history)
+        if result.get("status") == "ok" and result.get("answer"):
+            store = dict(result)
+            store["cached"] = False
+            answer_cache.set(key, store)
+        return result
+
+    return answer_flight.do(key, compute)

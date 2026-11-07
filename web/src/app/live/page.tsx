@@ -1,21 +1,22 @@
-import { LiveBoard } from "@/components/LiveBoard";
-import { PageHeader } from "@/components/PageHeader";
+import { LiveBoard } from "@/components/live/LiveBoard";
+import { PageHeader } from "@/components/layout/PageHeader";
 import {
   getLiveSnapshot,
   getSessionsWithStatus,
   pickDefaultSession,
-} from "@/lib/openf1-live";
-import { currentSeason } from "@/lib/validation";
+  resolveOpenF1Season,
+} from "@/lib/data/openf1-live";
 
 export const dynamic = "force-dynamic";
 
 export default async function LivePage() {
-  const season = currentSeason();
   let initial = null;
   let sessions: Awaited<ReturnType<typeof getSessionsWithStatus>> = [];
+  let season = new Date().getUTCFullYear();
   let loadError: string | null = null;
 
   try {
+    season = await resolveOpenF1Season();
     sessions = await getSessionsWithStatus(season);
     const picked = await pickDefaultSession(season);
     if (picked) {
@@ -30,7 +31,7 @@ export default async function LivePage() {
       <PageHeader
         eyebrow="Timing board"
         title="Live"
-        description="Session leaderboard from OpenF1 — live when a session is on, replay when it is not."
+        description="Session order while cars are on track — or the latest finished session when they are not."
       />
 
       {loadError ? (
@@ -38,7 +39,7 @@ export default async function LivePage() {
           {loadError}
         </p>
       ) : (
-        <LiveBoard initial={initial} sessions={sessions} />
+        <LiveBoard initial={initial} sessions={sessions} season={season} />
       )}
     </div>
   );

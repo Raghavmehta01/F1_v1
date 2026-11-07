@@ -8,9 +8,11 @@ from typing import Any
 import chromadb
 from chromadb.config import Settings
 
+from app.chat.cache import cache_key, knowledge_cache, normalize_query, rag_cache
 from app.chat.paths import CHROMA_DIR, COLLECTION_NAME
 
 _client: chromadb.PersistentClient | None = None
+_collection = None
 
 
 def get_client() -> chromadb.PersistentClient:
@@ -26,27 +28,50 @@ def get_client() -> chromadb.PersistentClient:
 
 
 def get_collection(create: bool = True):
+    global _collection
+    if _collection is not None:
+        return _collection
     client = get_client()
-    # Prefer get — get_or_create with metadata can mask an existing filled collection.
     try:
-        return client.get_collection(COLLECTION_NAME)
+        _collection = client.get_collection(COLLECTION_NAME)
+        return _collection
     except Exception:
         if not create:
             raise
-        return client.create_collection(
+        _collection = client.create_collection(
             name=COLLECTION_NAME,
             metadata={"hnsw:space": "cosine", "source": "fia_official"},
         )
+        return _collection
 
 
-def collection_count() -> int:
+def warm_rag() -> int:
+    """Open Chroma + load embedding path so first user isn't cold."""
+    knowledge_cache.clear()
+    count = collection_count(force=True)
+    if count > 0:
+        # Prime embedding model with a tiny query
+        try:
+            search_regulations("red flag", n_results=1)
+        except Exception:
+            pass
+    return count
+
+
+def collection_count(force: bool = False) -> int:
+    if not force:
+        cached = knowledge_cache.get("count")
+        if cached is not None:
+            return cached
     try:
-        return int(get_collection(create=False).count())
+        n = int(get_collection(create=False).count())
     except Exception:
         try:
-            return int(get_collection(create=True).count())
+            n = int(get_collection(create=True).count())
         except Exception:
-            return 0
+            n = 0
+    knowledge_cache.set("count", n)
+    return n
 
 
 def chunk_id(doc_id: str, page: int, idx: int, text: str) -> str:
@@ -59,10 +84,13 @@ def upsert_chunks(
     documents: list[str],
     metadatas: list[dict[str, Any]],
 ) -> int:
+    global _collection
     if not ids:
         return 0
+    _collection = None  # refresh handle after writes
+    knowledge_cache.clear()
+    rag_cache.clear()
     col = get_collection(create=True)
-    # Chroma batch limit — keep modest
     batch = 64
     for i in range(0, len(ids), batch):
         col.upsert(
@@ -70,23 +98,33 @@ def upsert_chunks(
             documents=documents[i : i + batch],
             metadatas=metadatas[i : i + batch],
         )
+    knowledge_cache.clear()
     return len(ids)
 
 
 def reset_collection() -> None:
+    global _collection
     client = get_client()
     try:
         client.delete_collection(COLLECTION_NAME)
     except Exception:
         pass
+    _collection = None
+    knowledge_cache.clear()
+    rag_cache.clear()
     get_collection(create=True)
 
 
 def search_regulations(query: str, n_results: int = 6) -> list[dict[str, Any]]:
+    n = max(1, min(n_results, 12))
+    key = cache_key("rag", normalize_query(query), n)
+    cached = rag_cache.get(key)
+    if cached is not None:
+        return cached
+
     col = get_collection(create=True)
     if col.count() == 0:
         return []
-    n = max(1, min(n_results, 12))
     raw = col.query(query_texts=[query], n_results=n)
     docs = (raw.get("documents") or [[]])[0]
     metas = (raw.get("metadatas") or [[]])[0]
@@ -107,4 +145,5 @@ def search_regulations(query: str, n_results: int = 6) -> list[dict[str, Any]]:
                 "distance": dist,
             }
         )
+    rag_cache.set(key, out)
     return out

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { TrackOutline } from "@/components/TrackOutline";
-import { getCircuit } from "@/lib/jolpica";
-import { parseId } from "@/lib/validation";
+import { TrackOutline } from "@/components/race/TrackOutline";
+import { getCircuit } from "@/lib/data/jolpica";
+import { parseId } from "@/lib/security/validation";
 import { notFound } from "next/navigation";
 
 export const revalidate = 86400;

@@ -1,5 +1,5 @@
-import { getSeasonCalendar } from "@/lib/jolpica";
-import { currentSeason, parseSeason } from "@/lib/validation";
+import { getSeasonCalendar } from "@/lib/data/jolpica";
+import { currentSeason, parseSeason } from "@/lib/security/validation";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
