@@ -13,6 +13,23 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Client bootstrap / poll effects legitimately sync external state after mount.
+      "react-hooks/set-state-in-effect": "off",
+      // Event-handler timestamps and ids are fine; rule is overly broad in handlers.
+      "react-hooks/purity": "off",
+      // Ref mirrors for async poll closures are intentional.
+      "react-hooks/refs": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

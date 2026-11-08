@@ -24,6 +24,7 @@ export function teamColor(constructorId: string | undefined): string {
   return COLORS[constructorId] ?? "#5C6670";
 }
 
+/** Stage type is always light ink. */
 export function teamStageInk(_constructorId?: string): string {
   return STAGE_INK;
 }

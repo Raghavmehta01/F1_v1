@@ -79,9 +79,12 @@ export function LiveBoard({
   const [pending, startTransition] = useTransition();
   const [followLive, setFollowLive] = useState(true);
   const followLiveRef = useRef(true);
-  followLiveRef.current = followLive;
   const backoffMs = useRef(0);
   const selectRef = useRef<HTMLSelectElement>(null);
+
+  useEffect(() => {
+    followLiveRef.current = followLive;
+  }, [followLive]);
 
   useEffect(() => {
     let cancelled = false;
