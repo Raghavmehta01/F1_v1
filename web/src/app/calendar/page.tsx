@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { CircuitMini } from "@/components/race/CircuitMini";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { getActiveSeasonYear, getSeasonCalendar } from "@/lib/data/jolpica";
+import { SeasonSwitcher } from "@/components/ui/SeasonSwitcher";
+import {
+  getActiveSeasonYear,
+  getSeasonCalendar,
+  getSeasons,
+} from "@/lib/data/jolpica";
 import { parseSeason } from "@/lib/security/validation";
 
 export const revalidate = 120;
@@ -14,8 +19,12 @@ export default async function CalendarPage({ searchParams }: Props) {
   const requested = parseSeason(params.season);
   const useCurrent = requested == null || requested === activeYear;
   const season = requested ?? activeYear;
-  const races = await getSeasonCalendar(useCurrent ? "current" : season);
+  const [races, seasons] = await Promise.all([
+    getSeasonCalendar(useCurrent ? "current" : season),
+    getSeasons().catch(() => [] as string[]),
+  ]);
   const todayUtc = new Date().toISOString().slice(0, 10);
+  const yearLinks = (seasons.length ? seasons : [String(season)]).slice(0, 10);
 
   return (
     <div className="page-wrap space-y-12 py-12 sm:py-16">
@@ -23,7 +32,15 @@ export default async function CalendarPage({ searchParams }: Props) {
         eyebrow="Season map"
         title="Calendar"
         description={`Every ${season} race weekend on the championship calendar.`}
-      />
+      >
+        <div className="pt-2">
+          <SeasonSwitcher
+            seasons={yearLinks}
+            current={String(season)}
+            makeHref={(s) => `/calendar?season=${s}`}
+          />
+        </div>
+      </PageHeader>
 
       <ol className="divide-y divide-[var(--line)] border-y border-[var(--line)]">
         {races.map((race, i) => {

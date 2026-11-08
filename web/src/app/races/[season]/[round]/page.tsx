@@ -2,7 +2,9 @@ import Link from "next/link";
 import { CircuitThumb } from "@/components/race/CircuitThumb";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { RaceWeekendTabs } from "@/components/race/RaceWeekendTabs";
+import { ShareCardButton } from "@/components/ui/ShareCardButton";
 import { getRaceWeekend } from "@/lib/data/jolpica";
+import { weekendBlurb } from "@/lib/data/next-session";
 import { getWeekendPracticeBoards } from "@/lib/data/openf1-live";
 import { getDriverMediaIndex } from "@/lib/data/openf1";
 import { parseRound, parseSeason } from "@/lib/security/validation";
@@ -72,6 +74,13 @@ export default async function RacePage({ params }: Props) {
             {" · "}
             <span className="font-mono text-[var(--ink)]">{meta.date}</span>
           </p>
+          <p className="max-w-xl text-sm text-[var(--ink)]">
+            {weekendBlurb(weekend.schedule ?? meta)}
+          </p>
+          <ShareCardButton
+            title={meta.raceName}
+            text={`${meta.raceName} · ${meta.Circuit.Location.locality} · ${meta.date}`}
+          />
         </div>
       </header>
 

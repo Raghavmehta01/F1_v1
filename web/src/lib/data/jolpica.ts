@@ -204,12 +204,93 @@ export async function getDriver(driverId: string) {
   return data.DriverTable?.Drivers?.[0] ?? null;
 }
 
+/** Recent race results for a driver (newest first). */
+export async function getDriverRecentResults(
+  driverId: string,
+  season: number | "current" = "current",
+  limit = 5,
+): Promise<
+  Array<{
+    round: string;
+    raceName: string;
+    date: string;
+    position: string;
+    points: string;
+    status: string;
+    grid: string;
+  }>
+> {
+  // Jolpica returns rounds ascending; pull the season then take the newest N.
+  const data = await jolpicaGet(
+    `/${seasonPath(season)}/drivers/${driverId}/results.json?limit=30`,
+    "raceResult",
+  );
+  const races = data.RaceTable?.Races ?? [];
+  return races
+    .slice(-limit)
+    .reverse()
+    .map((race) => {
+      const result = race.Results?.[0];
+      return {
+        round: race.round,
+        raceName: race.raceName,
+        date: race.date,
+        position: result?.position ?? "—",
+        points: result?.points ?? "0",
+        status: result?.status ?? "—",
+        grid: result?.grid ?? "—",
+      };
+    });
+}
+
 export async function getConstructor(constructorId: string) {
   const data = await jolpicaGet(
     `/constructors/${constructorId}.json`,
     "circuits",
   );
   return data.ConstructorTable?.Constructors?.[0] ?? null;
+}
+
+/** Recent race points for a constructor (newest first). */
+export async function getConstructorRecentResults(
+  constructorId: string,
+  season: number | "current" = "current",
+  limit = 5,
+): Promise<
+  Array<{
+    round: string;
+    raceName: string;
+    date: string;
+    points: number;
+    bestFinish: string;
+  }>
+> {
+  const data = await jolpicaGet(
+    `/${seasonPath(season)}/constructors/${constructorId}/results.json?limit=30`,
+    "raceResult",
+  );
+  const races = data.RaceTable?.Races ?? [];
+  return races
+    .slice(-limit)
+    .reverse()
+    .map((race) => {
+      const results = race.Results ?? [];
+      const points = results.reduce(
+        (sum, r) => sum + (Number.parseFloat(r.points) || 0),
+        0,
+      );
+      const best = results
+        .map((r) => Number.parseInt(r.position, 10))
+        .filter((n) => Number.isFinite(n))
+        .sort((a, b) => a - b)[0];
+      return {
+        round: race.round,
+        raceName: race.raceName,
+        date: race.date,
+        points,
+        bestFinish: best != null ? String(best) : "—",
+      };
+    });
 }
 
 export async function getCircuit(circuitId: string) {

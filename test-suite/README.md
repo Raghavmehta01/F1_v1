@@ -28,7 +28,7 @@ python -m pytest ../test-suite/api -q
 | Cloudinary / media URLs | `lib/media` | `web/unit/media.test.ts` |
 | Team stage colors | `lib/media/team-colors` | `web/unit/team-colors.test.ts` |
 | Race weekend schedule slots | `lib/data/race-sessions` | `web/unit/race-sessions.test.ts` |
-| Live session status / priority | `lib/data/openf1-live` | `web/unit/openf1-live.test.ts` |
+| Live session status / priority / ranking modes | `lib/data/openf1-live` | `web/unit/openf1-live.test.ts` |
 | Upstream TTL / 429 stale | `lib/data/upstream-cache` | `web/unit/upstream-cache.test.ts` |
 | Chat prompt quota + owner unlock | `lib/security/chat-quota` | `web/unit/chat-quota.test.ts` |
 | Web health | `app/api/health` | `web/routes/health.test.ts` |

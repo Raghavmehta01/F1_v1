@@ -1,6 +1,7 @@
 "use client";
 
 import { DriverAvatar } from "@/components/standings/DriverAvatar";
+import { ShareCardButton } from "@/components/ui/ShareCardButton";
 import type { LiveSnapshot, SessionWithStatus } from "@/lib/data/openf1-live";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
@@ -13,7 +14,8 @@ const BACKOFF_CAP_MS = 120_000;
 function formatGap(n: number | null): string {
   if (n == null || Number.isNaN(n)) return "—";
   if (n === 0) return "LED";
-  return `+${n.toFixed(3)}`;
+  const sign = n > 0 ? "+" : "";
+  return `${sign}${n.toFixed(3)}`;
 }
 
 function formatInterval(n: number | null): string {
@@ -33,6 +35,16 @@ function statusLabel(status: LiveSnapshot["status"]) {
   if (status === "live") return "Live now";
   if (status === "upcoming") return "Upcoming";
   return "Latest result";
+}
+
+function compoundClass(compound: string | null | undefined) {
+  const c = (compound ?? "").toUpperCase();
+  if (c.includes("SOFT")) return "bg-[#e10600] text-white";
+  if (c.includes("MEDIUM")) return "bg-[#f0a500] text-black";
+  if (c.includes("HARD")) return "bg-[#f4f1ea] text-black";
+  if (c.includes("INTER")) return "bg-[#2ecc71] text-black";
+  if (c.includes("WET")) return "bg-[#3b82f6] text-white";
+  return "bg-[var(--line)] text-[var(--muted)]";
 }
 
 function retryAfterMs(res: Response, body: { retry_after?: number } | null) {
@@ -69,8 +81,8 @@ export function LiveBoard({
   const followLiveRef = useRef(true);
   followLiveRef.current = followLive;
   const backoffMs = useRef(0);
+  const selectRef = useRef<HTMLSelectElement>(null);
 
-  // Keep the dropdown in sync with OpenF1 (no frozen SSR list).
   useEffect(() => {
     let cancelled = false;
     const refresh = async () => {
@@ -87,7 +99,7 @@ export function LiveBoard({
         if (body.season) setSeason(body.season);
         if (body.sessions?.length) setSessionList(body.sessions);
       } catch {
-        /* ignore — timing poll is the critical path */
+        /* ignore */
       }
     };
     void refresh();
@@ -108,9 +120,9 @@ export function LiveBoard({
     } | null;
     if (res.status === 429) {
       const wait = retryAfterMs(res, body);
-      const err = new Error(body?.error ?? "Timing feed is rate limited") as Error & {
-        retryAfterMs?: number;
-      };
+      const err = new Error(
+        body?.error ?? "OpenF1 is cooling down",
+      ) as Error & { retryAfterMs?: number };
       err.retryAfterMs = wait;
       throw err;
     }
@@ -128,9 +140,9 @@ export function LiveBoard({
     } | null;
     if (res.status === 429) {
       const wait = retryAfterMs(res, body);
-      const err = new Error(body?.error ?? "Timing feed is rate limited") as Error & {
-        retryAfterMs?: number;
-      };
+      const err = new Error(
+        body?.error ?? "OpenF1 is cooling down",
+      ) as Error & { retryAfterMs?: number };
       err.retryAfterMs = wait;
       throw err;
     }
@@ -165,7 +177,7 @@ export function LiveBoard({
           setSnapshot(best);
           setError(
             best.degraded
-              ? "Timing feed is busy — showing the last good board"
+              ? "Timing feed busy — showing last good board while OpenF1 recovers"
               : null,
           );
           schedule(best.status === "live" ? POLL_LIVE_MS : POLL_IDLE_MS);
@@ -178,7 +190,7 @@ export function LiveBoard({
         setSnapshot(next);
         setError(
           next.degraded
-            ? "Timing feed is busy — showing the last good board"
+            ? "Timing feed busy — showing last good board while OpenF1 recovers"
             : null,
         );
         schedule(
@@ -191,16 +203,15 @@ export function LiveBoard({
             ? Number((e as { retryAfterMs?: number }).retryAfterMs)
             : 0;
         const nextBackoff = Math.min(
-          wait > 0 ? wait : backoffMs.current
-            ? backoffMs.current * 2
-            : 15_000,
+          wait > 0 ? wait : backoffMs.current ? backoffMs.current * 2 : 15_000,
           BACKOFF_CAP_MS,
         );
         backoffMs.current = nextBackoff;
+        const secs = Math.ceil(nextBackoff / 1000);
         setError(
           e instanceof Error
-            ? `${e.message} · retrying in ${Math.ceil(nextBackoff / 1000)}s`
-            : "Feed error",
+            ? `${e.message}. Auto-retry in ${secs}s — board will refresh itself.`
+            : `Feed hiccup · retrying in ${secs}s`,
         );
         schedule(nextBackoff);
       }
@@ -213,6 +224,39 @@ export function LiveBoard({
     };
   }, [sessionKey, load, loadDefault]);
 
+  // j / k session hopping (pit-wall shortcuts)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)
+        return;
+      if (e.key !== "j" && e.key !== "k" && e.key !== "l") return;
+      e.preventDefault();
+      if (e.key === "l") {
+        setFollowLive(true);
+        startTransition(() => {
+          void loadDefault().then((best) => {
+            setSessionKey(best.session.session_key);
+            setSnapshot(best);
+          });
+        });
+        return;
+      }
+      if (!sessionList.length || sessionKey == null) return;
+      const idx = sessionList.findIndex((s) => s.session_key === sessionKey);
+      if (idx < 0) return;
+      const nextIdx =
+        e.key === "j"
+          ? Math.min(sessionList.length - 1, idx + 1)
+          : Math.max(0, idx - 1);
+      const next = sessionList[nextIdx];
+      if (!next) return;
+      setFollowLive(false);
+      startTransition(() => setSessionKey(next.session_key));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [sessionList, sessionKey, loadDefault]);
+
   const liveSessions = sessionList.filter((s) => s.status === "live");
   const headline = snapshot
     ? statusLabel(snapshot.status)
@@ -220,23 +264,46 @@ export function LiveBoard({
       ? "Live now"
       : "Latest result";
 
+  const isLive =
+    snapshot?.status === "live" || (!snapshot && liveSessions.length > 0);
+
+  const badge =
+    snapshot?.quali_segment ??
+    (snapshot?.status === "live"
+      ? "LIVE"
+      : snapshot?.status === "upcoming"
+        ? "UP NEXT"
+        : "RESULT");
+
+  const shareText = snapshot
+    ? `${snapshot.session.session_name} · ${snapshot.session.circuit_short_name}${
+        snapshot.rows[0]
+          ? ` · P1 ${snapshot.rows[0].name_acronym}`
+          : ""
+      }${snapshot.quali_segment ? ` · ${snapshot.quali_segment}` : ""}`
+    : "F1_v1 Live timing";
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-6 border border-[var(--line)] bg-[var(--bg-elevated)] p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-3 font-mono text-xs uppercase tracking-[0.18em]">
-            {snapshot?.status === "live" ||
-            (!snapshot && liveSessions.length) ? (
-              <>
-                <span className="relative flex h-2.5 w-2.5">
+          <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em]">
+            <span
+              className={`inline-flex items-center gap-2 border px-2 py-1 ${
+                isLive
+                  ? "border-[var(--live)] text-[var(--live)]"
+                  : "border-[var(--line)] text-[var(--muted)]"
+              }`}
+            >
+              {isLive ? (
+                <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--live)] opacity-60" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[var(--live)]" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--live)]" />
                 </span>
-                <span className="text-[var(--live)]">{headline}</span>
-              </>
-            ) : (
-              <span className="text-[var(--muted)]">{headline}</span>
-            )}
+              ) : null}
+              {badge}
+            </span>
+            <span className="text-[var(--muted)]">{headline}</span>
             {followLive ? (
               <span className="text-[var(--muted)]">· auto</span>
             ) : (
@@ -268,74 +335,98 @@ export function LiveBoard({
               <p className="mt-1 text-sm text-[var(--muted)]">
                 {snapshot.session.circuit_short_name} ·{" "}
                 {snapshot.session.country_name}
-                {(snapshot.timing_mode ?? "laps") === "laps"
-                  ? " · ordered by best lap"
-                  : snapshot.status === "live"
-                    ? " · live race order + gaps"
-                    : " · race order + gaps"}
+                {snapshot.quali_segment
+                  ? snapshot.quali_segment === "Final"
+                    ? " · final classification · pole order"
+                    : ` · ${snapshot.quali_segment} order`
+                  : snapshot.timing_mode === "laps"
+                    ? " · ordered by best lap"
+                    : snapshot.timing_mode === "classification"
+                      ? " · official classification"
+                      : snapshot.status === "live"
+                        ? " · live race order + gaps"
+                        : " · race order + gaps"}
+              </p>
+              <p className="mt-2 hidden font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--muted)] sm:block">
+                Keys · j/k session · l follow live
               </p>
             </div>
           ) : null}
         </div>
 
-        <label className="flex min-w-[16rem] flex-col gap-2 text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
-          Session
-          <select
-            className="border border-[var(--line)] bg-[var(--bg)] px-3 py-2.5 font-mono text-xs normal-case tracking-normal text-[var(--ink)] outline-none focus:border-[var(--ink)]"
-            value={sessionKey ?? ""}
-            onChange={(e) => {
-              const key = Number.parseInt(e.target.value, 10);
-              if (!Number.isFinite(key)) return;
-              setFollowLive(false);
-              startTransition(() => setSessionKey(key));
-            }}
-          >
-            {sessionList.map((s) => (
-              <option key={s.session_key} value={s.session_key}>
-                {s.status === "live"
-                  ? "● "
-                  : s.status === "upcoming"
-                    ? "○ "
-                    : ""}
-                {s.date_start.slice(0, 10)} · {s.session_name} ·{" "}
-                {s.circuit_short_name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex flex-col gap-3 sm:items-end">
+          <ShareCardButton title="F1_v1 Live" text={shareText} />
+          <label className="flex min-w-[16rem] flex-col gap-2 text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+            Session
+            <select
+              ref={selectRef}
+              className="border border-[var(--line)] bg-[var(--bg)] px-3 py-2.5 font-mono text-xs normal-case tracking-normal text-[var(--ink)] outline-none focus:border-[var(--ink)]"
+              value={sessionKey ?? ""}
+              onChange={(e) => {
+                const key = Number.parseInt(e.target.value, 10);
+                if (!Number.isFinite(key)) return;
+                setFollowLive(false);
+                startTransition(() => setSessionKey(key));
+              }}
+            >
+              {sessionList.map((s) => (
+                <option key={s.session_key} value={s.session_key}>
+                  {s.status === "live"
+                    ? "● "
+                    : s.status === "upcoming"
+                      ? "○ "
+                      : ""}
+                  {s.date_start.slice(0, 10)} · {s.session_name} ·{" "}
+                  {s.circuit_short_name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
       {error ? (
-        <p className="border border-[var(--brand)]/40 px-4 py-3 text-sm text-[var(--brand)]">
+        <p className="border border-[var(--live)]/40 bg-[var(--bg-elevated)] px-4 py-3 text-sm text-[var(--live)]">
           {error}
         </p>
       ) : null}
 
       {!snapshot?.rows.length ? (
-        <p className="text-[var(--muted)]">
-          No timing rows for this session yet — pick another session or check
-          back shortly.
-        </p>
+        <div className="border border-dashed border-[var(--line)] px-4 py-10 text-center">
+          <p className="font-display text-xl tracking-tight text-[var(--ink)]">
+            Timing board warming up
+          </p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-[var(--muted)]">
+            No rows for this session yet — cars may not have set a time, or
+            OpenF1 is still publishing. Pick another session or wait for the
+            auto-refresh.
+          </p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="data-table min-w-[48rem]">
             <thead>
               <tr>
-                <th className="w-14">Pos</th>
-                <th>Driver</th>
+                <th className="sticky left-0 z-10 w-14 bg-[var(--bg-elevated)]">
+                  Pos
+                </th>
+                <th className="sticky left-14 z-10 min-w-[11rem] bg-[var(--bg-elevated)] sm:left-[3.5rem]">
+                  Driver
+                </th>
                 <th>Team</th>
-                {(snapshot.timing_mode ?? "laps") === "laps" ? (
+                <th className="font-mono">Tyre</th>
+                {snapshot.timing_mode === "race" ? (
+                  <>
+                    <th className="font-mono">Interval</th>
+                    <th className="font-mono">Gap</th>
+                    <th className="font-mono">Best</th>
+                  </>
+                ) : (
                   <>
                     <th className="font-mono">Best</th>
                     <th className="font-mono">Last</th>
                     <th className="font-mono">Gap</th>
                     <th className="font-mono">Laps</th>
-                  </>
-                ) : (
-                  <>
-                    <th className="font-mono">Interval</th>
-                    <th className="font-mono">Gap</th>
-                    <th className="font-mono">Best</th>
                   </>
                 )}
               </tr>
@@ -343,8 +434,10 @@ export function LiveBoard({
             <tbody>
               {snapshot.rows.map((row) => (
                 <tr key={row.driver_number}>
-                  <td className="font-mono text-base">{row.position}</td>
-                  <td>
+                  <td className="sticky left-0 z-10 bg-[var(--bg)] font-mono text-base">
+                    {row.position}
+                  </td>
+                  <td className="sticky left-14 z-10 bg-[var(--bg)] sm:left-[3.5rem]">
                     <span className="flex items-center gap-3">
                       <DriverAvatar
                         src={row}
@@ -363,7 +456,32 @@ export function LiveBoard({
                     </span>
                   </td>
                   <td className="text-[var(--muted)]">{row.team_name}</td>
-                  {(snapshot.timing_mode ?? "laps") === "laps" ? (
+                  <td>
+                    {row.compound ? (
+                      <span
+                        className={`inline-block px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider ${compoundClass(row.compound)}`}
+                      >
+                        {row.compound.slice(0, 3)}
+                      </span>
+                    ) : (
+                      <span className="text-[var(--muted)]">—</span>
+                    )}
+                  </td>
+                  {snapshot.timing_mode === "race" ? (
+                    <>
+                      <td className="font-mono">
+                        {row.position === 1
+                          ? "—"
+                          : formatInterval(row.interval)}
+                      </td>
+                      <td className="font-mono text-[var(--live)]">
+                        {formatGap(row.gap_to_leader)}
+                      </td>
+                      <td className="font-mono text-[var(--muted)]">
+                        {formatLap(row.best_lap ?? null)}
+                      </td>
+                    </>
+                  ) : (
                     <>
                       <td className="font-mono">
                         {formatLap(row.best_lap ?? null)}
@@ -376,20 +494,6 @@ export function LiveBoard({
                       </td>
                       <td className="font-mono text-[var(--muted)]">
                         {row.laps || "—"}
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="font-mono">
-                        {row.position === 1
-                          ? "—"
-                          : formatInterval(row.interval)}
-                      </td>
-                      <td className="font-mono text-[var(--live)]">
-                        {formatGap(row.gap_to_leader)}
-                      </td>
-                      <td className="font-mono text-[var(--muted)]">
-                        {formatLap(row.best_lap ?? null)}
                       </td>
                     </>
                   )}

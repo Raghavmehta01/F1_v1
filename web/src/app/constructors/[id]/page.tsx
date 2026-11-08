@@ -3,6 +3,7 @@ import { SafeImage } from "@/components/ui/SafeImage";
 import { StatWall } from "@/components/home/StatWall";
 import {
   getConstructor,
+  getConstructorRecentResults,
   getConstructorStandings,
   getDriverStandingsDetailed,
 } from "@/lib/data/jolpica";
@@ -26,7 +27,7 @@ export default async function ConstructorPage({ params }: Props) {
   const id = parseId(raw);
   if (!id) notFound();
 
-  const [team, constructors, drivers, media] = await Promise.all([
+  const [team, constructors, drivers, media, form] = await Promise.all([
     getConstructor(id),
     getConstructorStandings("current").catch(() => []),
     getDriverStandingsDetailed("current").catch(() => ({
@@ -35,6 +36,7 @@ export default async function ConstructorPage({ params }: Props) {
       standings: [],
     })),
     getDriverMediaIndex().catch(() => null),
+    getConstructorRecentResults(id, "current", 5).catch(() => []),
   ]);
   if (!team) notFound();
 
@@ -207,6 +209,39 @@ export default async function ConstructorPage({ params }: Props) {
           title={`${drivers.season || "2026"} season`}
           stats={seasonStats}
         />
+
+        {form.length ? (
+          <div className="space-y-4">
+            <h2 className="font-display text-2xl tracking-tight">Recent form</h2>
+            <p className="text-sm text-[var(--muted)]">
+              Team points across the last {form.length} races.
+            </p>
+            <ol className="divide-y divide-[var(--line)] border border-[var(--line)]">
+              {form.map((r) => (
+                <li
+                  key={`${r.round}-${r.date}`}
+                  className="grid gap-2 px-4 py-3 sm:grid-cols-[4rem_1fr_auto_auto] sm:items-center"
+                >
+                  <span className="font-mono text-xs text-[var(--muted)]">
+                    R{r.round.padStart(2, "0")}
+                  </span>
+                  <Link
+                    href={`/races/${drivers.season || new Date().getUTCFullYear()}/${r.round}`}
+                    className="hover:text-[var(--brand)]"
+                  >
+                    {r.raceName}
+                  </Link>
+                  <span className="font-mono text-sm">
+                    best P{r.bestFinish}
+                  </span>
+                  <span className="font-mono text-xs text-[var(--muted)]">
+                    {r.points} pts
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
 
         <Link href="/standings" className="btn-ghost inline-flex">
           View standings

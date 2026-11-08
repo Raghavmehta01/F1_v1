@@ -33,7 +33,7 @@ export function HeroLeaders({
   if (!driver && !ctor) return null;
 
   return (
-    <div className="animate-hero-rise-delay w-full max-w-xl space-y-3">
+    <div className="animate-hero-rise-delay w-full space-y-3">
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="eyebrow">Leaders</p>

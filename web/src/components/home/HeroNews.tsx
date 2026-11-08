@@ -54,7 +54,7 @@ export function HeroNews({ items }: { items: F1Headline[] }) {
   const sliding = feed.length > VISIBLE;
 
   return (
-    <aside className="animate-hero-rise-delay hidden min-h-0 w-[min(20rem,26%)] shrink-0 flex-col justify-center border-l border-[var(--line)] px-5 py-10 xl:w-[min(22rem,24%)] xl:px-6 lg:flex">
+    <div className="animate-hero-rise-delay min-w-0">
       <div className="mb-5 flex items-end justify-between gap-3">
         <p className="eyebrow">Latest</p>
         <a
@@ -105,6 +105,6 @@ export function HeroNews({ items }: { items: F1Headline[] }) {
           ))}
         </ul>
       </div>
-    </aside>
+    </div>
   );
 }

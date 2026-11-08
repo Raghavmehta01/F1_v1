@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { StatWall } from "@/components/home/StatWall";
-import { getDriver, getDriverStandingsDetailed } from "@/lib/data/jolpica";
+import {
+  getDriver,
+  getDriverRecentResults,
+  getDriverStandingsDetailed,
+} from "@/lib/data/jolpica";
 import { fullDriverImage, mediaFromStanding } from "@/lib/media";
 import { getDriverMediaIndex, matchOpenF1Driver } from "@/lib/data/openf1";
 import { teamStageFill, teamStageInk } from "@/lib/media/team-colors";
@@ -17,10 +21,11 @@ export default async function DriverPage({ params }: Props) {
   const id = parseId(raw);
   if (!id) notFound();
 
-  const [driver, media, standings] = await Promise.all([
+  const [driver, media, standings, form] = await Promise.all([
     getDriver(id),
     getDriverMediaIndex().catch(() => null),
     getDriverStandingsDetailed("current").catch(() => null),
+    getDriverRecentResults(id, "current", 5).catch(() => []),
   ]);
   if (!driver) notFound();
 
@@ -106,6 +111,44 @@ export default async function DriverPage({ params }: Props) {
 
       <section className="page-wrap space-y-10 py-14 sm:py-16">
         <StatWall title="Statistics" stats={stats} />
+
+        {form.length ? (
+          <div className="space-y-4">
+            <h2 className="font-display text-2xl tracking-tight">Recent form</h2>
+            <p className="text-sm text-[var(--muted)]">
+              Last {form.length} race results this season.
+            </p>
+            <ol className="divide-y divide-[var(--line)] border border-[var(--line)]">
+              {form.map((r) => (
+                <li
+                  key={`${r.round}-${r.date}`}
+                  className="grid gap-2 px-4 py-3 sm:grid-cols-[4rem_1fr_auto_auto] sm:items-center"
+                >
+                  <span className="font-mono text-xs text-[var(--muted)]">
+                    R{r.round.padStart(2, "0")}
+                  </span>
+                  <Link
+                    href={`/races/${standings?.season ?? new Date().getUTCFullYear()}/${r.round}`}
+                    className="hover:text-[var(--brand)]"
+                  >
+                    {r.raceName}
+                  </Link>
+                  <span className="font-mono text-sm">
+                    P{r.position}
+                    <span className="text-[var(--muted)]">
+                      {" "}
+                      · grid {r.grid}
+                    </span>
+                  </span>
+                  <span className="font-mono text-xs text-[var(--muted)]">
+                    {r.points} pts
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap gap-3">
           {constructorId ? (
             <Link
@@ -115,6 +158,9 @@ export default async function DriverPage({ params }: Props) {
               Team page
             </Link>
           ) : null}
+          <Link href={`/battle?a=${id}`} className="btn-ghost">
+            Battle
+          </Link>
           <Link href="/standings" className="btn-ghost">
             Standings
           </Link>

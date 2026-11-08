@@ -20,9 +20,11 @@ import {
   mediaFromStanding,
 } from "@/lib/media";
 import { getDriverMediaIndex, matchOpenF1Driver } from "@/lib/data/openf1";
+import { findNextSession } from "@/lib/data/next-session";
 import { raceSessionSlots } from "@/lib/data/race-sessions";
 import { teamColor } from "@/lib/media/team-colors";
 import type { ConstructorStanding, Race } from "@/lib/data/types";
+import { SessionCountdown } from "@/components/home/SessionCountdown";
 
 export const revalidate = 120;
 
@@ -153,6 +155,7 @@ export default async function HomePage() {
       : "";
   const sessions =
     featured?.status === "upcoming" ? raceSessionSlots(featured.race) : [];
+  const nextSession = findNextSession(races);
 
   const byTeam = new Map<string, typeof allDriverStandings>();
   for (const d of allDriverStandings) {
@@ -199,22 +202,43 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {sessions.length ? (
-              <RaceWeekendTimes sessions={sessions} />
-            ) : (
-              <div className="flex-1" aria-hidden />
-            )}
+            <div className="space-y-4">
+              {nextSession ? (
+                <SessionCountdown
+                  targetIso={nextSession.slot.at}
+                  label={`${nextSession.slot.label} · ${nextSession.race.raceName}`}
+                />
+              ) : null}
+              {sessions.length ? (
+                <RaceWeekendTimes sessions={sessions} />
+              ) : !nextSession ? (
+                <div className="flex-1" aria-hidden />
+              ) : null}
+            </div>
+          </div>
 
+          <aside className="hidden min-h-0 w-[min(22rem,28%)] shrink-0 flex-col justify-center gap-8 overflow-y-auto border-l border-[var(--line)] px-5 py-10 xl:w-[min(24rem,26%)] xl:px-6 lg:flex">
+            <HeroNews items={headlines} />
             <HeroLeaders
               driver={leadDriver}
               constructor={leadConstructor}
               round={standingsRound}
               season={standingsSeason}
             />
-          </div>
-
-          <HeroNews items={headlines} />
+          </aside>
           <HeroPack />
+        </div>
+      </section>
+
+      {/* Mobile: leaders sit below the hero (news column is lg-only). */}
+      <section className="border-t border-[var(--line)] lg:hidden">
+        <div className="page-wrap py-8">
+          <HeroLeaders
+            driver={leadDriver}
+            constructor={leadConstructor}
+            round={standingsRound}
+            season={standingsSeason}
+          />
         </div>
       </section>
 
