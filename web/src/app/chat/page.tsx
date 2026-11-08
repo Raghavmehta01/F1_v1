@@ -6,7 +6,7 @@ export default function ChatPage() {
       <div className="mb-3 flex shrink-0 flex-wrap items-end justify-between gap-2 sm:mb-4">
         <div className="min-w-0">
           <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--muted)] sm:text-[10px]">
-            Radio · Pit Wall
+            Radio · Pitwall
           </p>
           <h1 className="mt-0.5 font-display text-2xl tracking-tight text-[var(--ink)] sm:text-3xl md:text-4xl">
             Chat
@@ -19,15 +19,25 @@ export default function ChatPage() {
 
       <ChatPanel className="min-h-0 flex-1" />
 
-      <p className="mt-2 shrink-0 truncate text-[10px] text-[var(--muted)] sm:mt-3 sm:text-[11px]">
+      <p className="mt-2 shrink-0 text-[10px] leading-relaxed text-[var(--muted)] sm:mt-3 sm:text-[11px]">
         Regs © FIA ·{" "}
         <a
           href="https://www.fia.com/regulation/category/2182"
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           className="underline decoration-[var(--line)] underline-offset-2 hover:text-[var(--ink)]"
         >
           fia.com
+        </a>
+        {" · "}
+        Pitwall by{" "}
+        <a
+          href="https://www.linkedin.com/in/raghavmehta1/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline decoration-[var(--line)] underline-offset-2 hover:text-[var(--ink)]"
+        >
+          Raghav Mehta
         </a>
         {" · "}
         Not affiliated with F1 / FIA

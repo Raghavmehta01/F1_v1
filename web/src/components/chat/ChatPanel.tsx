@@ -276,7 +276,7 @@ export function ChatPanel({ className = "" }: { className?: string }) {
           </span>
           <div className="min-w-0">
             <p className="truncate font-display text-sm tracking-tight text-[var(--ink)] sm:text-base">
-              Pit Wall
+              Pitwall
             </p>
             <p className="truncate font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--muted)] sm:text-[10px]">
               {ready ? "Online" : "Offline"}
@@ -371,7 +371,7 @@ export function ChatPanel({ className = "" }: { className?: string }) {
                         isUser ? "text-right" : "text-left"
                       }`}
                     >
-                      {isUser ? "You" : "Pit Wall"}
+                      {isUser ? "You" : "Pitwall"}
                       {m.cached ? " · cached" : ""}
                       {" · "}
                       {new Date(m.at).toLocaleTimeString([], {
@@ -416,7 +416,7 @@ export function ChatPanel({ className = "" }: { className?: string }) {
             onKeyDown={onKeyDown}
             disabled={pending || quotaBlocked}
             placeholder={
-              quotaBlocked ? "Prompt limit reached" : "Message Pit Wall…"
+              quotaBlocked ? "Prompt limit reached" : "Message Pitwall…"
             }
             className="max-h-[120px] min-h-[40px] min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-snug text-[var(--ink)] outline-none placeholder:text-[var(--muted)] disabled:opacity-60 sm:max-h-[140px] sm:py-2.5"
           />

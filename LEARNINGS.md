@@ -1,4 +1,4 @@
-# F1_v1 — Learnings journal
+# Pitwall — Learnings journal
 
 Hands-on notes per phase. Add what you built, what broke, and what you’d change.
 
@@ -6,7 +6,7 @@ Hands-on notes per phase. Add what you built, what broke, and what you’d chang
 
 **Practiced:** monorepo layout (`web/` + `api/`), env hygiene, CSS theme tokens + dark default, host allowlist, Docker Compose, GitHub Actions CI skeleton.
 
-**Built:** Next.js App Router shell with F1_v1 branding, FastAPI health + stub `/predict` behind shared secret, security helpers, CI workflow.
+**Built:** Next.js App Router shell with Pitwall branding, FastAPI health + stub `/predict` behind shared secret, security helpers, CI workflow.
 
 **Notes:**
 - Jolpica requires a custom `User-Agent` — without it requests can fail.

@@ -1,15 +1,16 @@
-# F1_v1
-
+# Pitwall
 
 Formula 1 hub: standings, calendar, results, history, ML race predictions, and an agentic chat assistant.
 
-**Brand:** F1_v1 · **Default theme:** dark · **Chat model:** Llama 3.3 70B (Groq) · **ML:** LightGBM (FastAPI)
+**Brand:** Pitwall · **Developer:** [Raghav Mehta](https://www.linkedin.com/in/raghavmehta1/) · **Default theme:** dark · **Chat model:** Llama 3.3 70B (Groq) · **ML:** LightGBM (FastAPI)
 
-Not affiliated with Formula 1 companies. Data via [Jolpica](https://github.com/jolpica/jolpica-f1) and [OpenF1](https://openf1.org/).
+© 2026 Raghav Mehta. Pitwall software and original site assets — all rights reserved.
+
+Not affiliated with Formula 1 companies or the FIA. Data via [Jolpica](https://github.com/jolpica/jolpica-f1) and [OpenF1](https://openf1.org/).
 
 ### Imagery
 
-Official driver / team / car graphics are fetched from the Formula 1 media CDN (`media.formula1.com` via Cloudinary URL helpers in `web/src/lib/media.ts`). Do not bulk-download them into git or blob storage — keep site-owned assets only in `web/public/` (hero pack, radio sting, UI logos). F1 trademarks and photos remain property of their owners.
+Official driver / team / car graphics are fetched from the Formula 1 media CDN (`media.formula1.com` via Cloudinary URL helpers in `web/src/lib/media.ts`). Do not bulk-download them into git or blob storage — keep site-owned assets only in `web/public/` (hero pack, radio sting, UI logos). F1 trademarks and photos remain property of their owners. FIA regulations remain © FIA.
 
 ## Learning pillars
 

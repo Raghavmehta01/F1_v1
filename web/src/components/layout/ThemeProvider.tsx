@@ -17,8 +17,8 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
-const STORAGE_KEY = "f1_v1-theme";
-const THEME_EVENT = "f1_v1-theme";
+const STORAGE_KEY = "pitwall-theme";
+const THEME_EVENT = "pitwall-theme";
 
 function applyTheme(theme: Theme) {
   document.documentElement.setAttribute("data-theme", theme);

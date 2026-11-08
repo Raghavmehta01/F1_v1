@@ -13,7 +13,7 @@ from pypdf import PdfReader
 from app.chat.paths import MANIFEST_PATH, OFFICIAL_PDF_DIR
 from app.chat.rag import chunk_id, collection_count, reset_collection, upsert_chunks
 
-USER_AGENT = "F1_v1-knowledge/0.1 (educational RAG; local ingest)"
+USER_AGENT = "Pitwall-knowledge/0.1 (educational RAG; local ingest)"
 CHUNK_CHARS = 1400
 CHUNK_OVERLAP = 200
 

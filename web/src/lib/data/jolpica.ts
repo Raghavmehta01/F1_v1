@@ -9,7 +9,7 @@ import { createUpstreamCache } from "@/lib/data/upstream-cache";
 import { currentSeason } from "@/lib/security/validation";
 
 const BASE = "https://api.jolpi.ca/ergast/f1";
-const USER_AGENT = "F1_v1/0.1.0 (https://github.com/Raghavmehta01/F1_v1)";
+const USER_AGENT = "Pitwall/0.1.0 (https://github.com/Raghavmehta01/F1_v1)";
 const jolpicaCache = createUpstreamCache("Jolpica");
 
 type MrData = {
@@ -155,6 +155,64 @@ export async function getRaceResults(
     "raceResult",
   );
   return data.RaceTable?.Races?.[0] ?? null;
+}
+
+/** All race results for a season (used for calendar podiums). */
+export async function getSeasonRaceResults(
+  season: number | "current" = "current",
+): Promise<Race[]> {
+  const data = await jolpicaGet(
+    `/${seasonPath(season)}/results.json?limit=100`,
+    "raceResult",
+  );
+  return data.RaceTable?.Races ?? [];
+}
+
+export type PodiumSlot = {
+  position: "1" | "2" | "3";
+  driverId: string;
+  code: string;
+  name: string;
+  constructorId: string;
+  constructorName: string;
+  /** Race time for P1, or gap for P2/P3 when available. */
+  detail: string;
+};
+
+/** Top-three finishers for each round that has results. */
+export function podiumByRound(races: Race[]): Map<string, PodiumSlot[]> {
+  const map = new Map<string, PodiumSlot[]>();
+  for (const race of races) {
+    const top = (race.Results ?? [])
+      .filter((r) => ["1", "2", "3"].includes(r.position))
+      .sort((a, b) => Number(a.position) - Number(b.position))
+      .slice(0, 3)
+      .map((r): PodiumSlot => {
+        const code =
+          r.Driver.code ??
+          r.Driver.familyName.slice(0, 3).toUpperCase();
+        let detail = "—";
+        if (r.Time?.time) {
+          detail =
+            r.position === "1" || r.Time.time.startsWith("+")
+              ? r.Time.time
+              : `+${r.Time.time}`;
+        } else if (r.status && r.status !== "Finished") {
+          detail = r.status;
+        }
+        return {
+          position: r.position as "1" | "2" | "3",
+          driverId: r.Driver.driverId,
+          code,
+          name: `${r.Driver.givenName} ${r.Driver.familyName}`,
+          constructorId: r.Constructor.constructorId,
+          constructorName: r.Constructor.name,
+          detail,
+        };
+      });
+    if (top.length) map.set(race.round, top);
+  }
+  return map;
 }
 
 export async function getQualifying(

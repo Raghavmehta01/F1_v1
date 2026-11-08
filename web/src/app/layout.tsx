@@ -26,11 +26,26 @@ const timing = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "F1_v1",
-    template: "%s · F1_v1",
+    default: "Pitwall",
+    template: "%s · Pitwall",
   },
   description:
-    "Formula 1 standings, results, live timing, history, and race chat.",
+    "Pitwall — Formula 1 standings, results, live timing, history, and race chat. Developed by Raghav Mehta.",
+  applicationName: "Pitwall",
+  authors: [{ name: "Raghav Mehta", url: "https://www.linkedin.com/in/raghavmehta1/" }],
+  creator: "Raghav Mehta",
+  publisher: "Raghav Mehta",
+  other: {
+    copyright: "© 2026 Raghav Mehta. All rights reserved.",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.png", type: "image/png", sizes: "32x32" },
+      { url: "/brand/pitwall-mark-v2.png", type: "image/png" },
+    ],
+    apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180" }],
+    shortcut: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

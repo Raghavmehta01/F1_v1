@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 class HealthResponse(BaseModel):
     status: str = "ok"
-    service: str = "f1_v1-ml"
+    service: str = "pitwall-ml"
 
 
 class DriverPrediction(BaseModel):

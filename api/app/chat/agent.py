@@ -35,7 +35,7 @@ MSG_CHAR_CAP = 500
 TOOL_RESULT_CAP = 1200
 RAG_HITS = 2
 
-FINAL_SYSTEM = """You are F1_v1 Pit Wall. Answer using ONLY the evidence below.
+FINAL_SYSTEM = """You are Pitwall. Answer using ONLY the evidence below.
 Plain prose, no markdown. Short title, 1-2 short paragraphs, one citation line
 (Section · Iss · p.). Prefer Section B for flags/session procedures.
 Not affiliated with F1/FIA."""

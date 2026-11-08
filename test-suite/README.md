@@ -1,4 +1,4 @@
-# F1_v1 test suite
+# Pitwall test suite
 
 Feature-oriented tests for the Next.js web app and FastAPI service.
 

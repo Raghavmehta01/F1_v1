@@ -38,6 +38,7 @@ export default async function HomePage() {
   let topDrivers: Array<{
     id: string;
     name: string;
+    team: string;
     points: string;
     pos: string;
     color: string;
@@ -102,6 +103,7 @@ export default async function HomePage() {
       return {
         id: row.Driver.driverId,
         name: `${row.Driver.givenName} ${row.Driver.familyName}`,
+        team: team?.name ?? "",
         points: row.points,
         pos: row.position,
         color: teamColor(team?.constructorId),
@@ -185,8 +187,8 @@ export default async function HomePage() {
         <div className="relative z-10 flex h-[calc(100svh-4rem)] max-h-[calc(100svh-4rem)] overflow-hidden">
           <div className="flex min-h-0 w-full min-w-0 flex-col justify-between gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:w-[min(34rem,38%)] lg:shrink-0 lg:px-8 lg:py-12 xl:w-[min(36rem,36%)] xl:pl-12">
             <div className="flex min-w-0 flex-col space-y-4">
-              <p className="font-display animate-hero-rise text-[clamp(3.25rem,9vw,5.75rem)] leading-[0.85] text-[var(--ink)]">
-                F1_v1
+              <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.35rem,7.2vw,5.25rem)] leading-[0.85] text-[var(--ink)]">
+                Formula 1
               </p>
               <div className="animate-hero-rise-delay space-y-2">
                 <p className="eyebrow !text-[var(--brand)]">

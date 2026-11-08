@@ -4,6 +4,7 @@ import { DriverPortrait } from "@/components/standings/DriverPortrait";
 export type HeroRankDriver = {
   id: string;
   name: string;
+  team?: string;
   points: string;
   pos: string;
   color: string;
@@ -64,6 +65,11 @@ export function HeroRankings({
               <span className="min-w-0 flex-1 truncate text-base font-medium text-[var(--ink)] group-hover:text-[var(--brand)] sm:text-lg">
                 {d.name}
               </span>
+              {d.team ? (
+                <span className="min-w-0 max-w-[40%] truncate text-right text-sm text-[var(--muted)] sm:max-w-[16rem] sm:text-left">
+                  {d.team}
+                </span>
+              ) : null}
               <span className="shrink-0 font-mono text-base text-[var(--ink)] sm:text-lg">
                 {d.points}
               </span>

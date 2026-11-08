@@ -12,7 +12,7 @@ components/
   standings/         Tables, stage cards, avatars
   race/              Results, weekend tabs, circuits
   live/              Timing board
-  chat/              Pit Wall UI
+  chat/              Pitwall UI
   ui/                Shared primitives (SafeImage, loader)
 lib/
   data/              Jolpica, OpenF1, news, types, caches
