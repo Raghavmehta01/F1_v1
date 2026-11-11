@@ -33,7 +33,7 @@ Import examples:
 main.py              App factory, CORS, health
 core/                Shared auth (X-ML-Secret)
 chat/                RAG agent, tools, ingest, Chroma
-predict/             LightGBM stub routes
+predict/             LightGBM / heuristic prediction routes
 schemas.py           Pydantic models
 ```
 

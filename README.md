@@ -18,7 +18,7 @@ Official driver / team / car graphics are fetched from the Formula 1 media CDN (
 |---|---|
 | Development | `web/` Next.js + `api/` FastAPI |
 | GenAI / Agentic AI | `/chat` UI → `/api/chat` → FastAPI RAG (Chroma + official FIA PDFs) + Groq Llama 3.3 70B |
-| ML | `api/ml/` train → serve `/predict` (Phase 3) |
+| ML | `api/ml/` LightGBM (+ heuristic fallback) → `/predict` |
 | DevOps | Docker Compose, GitHub Actions, deploy |
 
 See [LEARNINGS.md](LEARNINGS.md) for the hands-on journal.
@@ -93,7 +93,7 @@ docker-compose.yml
 - [x] Phase 5 — OpenF1 live / replay leaderboard
 - [x] Phase 6 — Production deploy readiness (Docker, env, chat quota, allowlist)
 - [x] Phase 4 — Agentic chat (Groq + Chroma over official FIA regs + Jolpica tools)
-- [ ] Phase 3 — LightGBM predictions **(on hold — last)**
+- [x] Phase 3 — LightGBM / heuristic race predictions (`python -m ml.train`)
 
 ### Chat knowledge (official FIA only)
 
@@ -144,6 +144,15 @@ cd api
 ```
 
 API env: `ML_SHARED_SECRET`, `GROQ_API_KEY`, `GROQ_MODEL`, `CORS_ORIGINS`, and a persistent volume for `data/chroma` + `knowledge/official`.
+
+### Race predictions (ML)
+
+```bash
+cd api
+python -m ml.train --start 2019 --end 2025   # writes ml/artifacts/model.joblib
+```
+
+`/predict` uses LightGBM when the artifact exists; otherwise a standings/form **heuristic** so the Predict page still works on fresh deploys.
 
 ### Chat quota (owner unlimited)
 

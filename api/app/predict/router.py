@@ -1,11 +1,12 @@
-"""Race prediction routes (stub until LightGBM ships)."""
+"""Race prediction routes (LightGBM or heuristic fallback)."""
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.core.auth import require_shared_secret
-from app.schemas import DriverPrediction, PredictResponse
+from app.predict.service import predict_race
+from app.schemas import PredictResponse
 
 router = APIRouter(tags=["predict"])
 
@@ -19,20 +20,7 @@ def predict(
     season: int = Query(..., ge=1950, le=2100),
     round: int = Query(..., ge=1, le=30),
 ) -> PredictResponse:
-    """Stub until Phase 3 trains LightGBM."""
-    return PredictResponse(
-        season=season,
-        round=round,
-        model_version="stub-0.1.0",
-        status="not_trained",
-        message="Model not trained yet. Run the Phase 3 training pipeline.",
-        predictions=[
-            DriverPrediction(
-                driver_id="placeholder",
-                driver_name="Awaiting training",
-                win_probability=0.0,
-                podium_probability=0.0,
-                rank=1,
-            )
-        ],
-    )
+    try:
+        return predict_race(season, round)
+    except Exception as e:  # noqa: BLE001 — surface upstream failures cleanly
+        raise HTTPException(status_code=502, detail=f"Prediction failed: {e}") from e

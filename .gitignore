@@ -19,11 +19,12 @@ web/.next/
 web/out/
 web/build/
 
-# ML artifacts (large / regenerated)
-api/ml/artifacts/*.pkl
-api/ml/artifacts/*.joblib
-api/ml/artifacts/model.*
+# ML caches (artifacts like model.joblib are committed for deploy)
+api/ml/cache/
 !api/ml/artifacts/.gitkeep
+!api/ml/artifacts/model.joblib
+!api/ml/artifacts/model_meta.json
+
 
 # Official FIA PDFs (downloaded) + Chroma vector store
 api/knowledge/official/*.pdf

@@ -33,9 +33,11 @@ Hands-on notes per phase. Add what you built, what broke, and what you’d chang
 
 **Built:** `/history` season grid.
 
-## Phase 3 — ML (todo)
+## Phase 3 — ML
 
-Train/eval LightGBM, metrics, retrain script, wire Predictions UI.
+**Practiced:** Jolpica historical features (form, circuit, team, grid proxy), LightGBM regressor + heuristic fallback, train script, Predict UI.
+
+**Built:** `api/ml/*`, `app/predict/service.py`, `/predict` live board, `python -m ml.train`.
 
 ## Phase 4 — GenAI / Agentic
 

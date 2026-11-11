@@ -1,0 +1,24 @@
+{
+  "version": "lgbm-20261111",
+  "metrics": {
+    "mae_finish": 2.734,
+    "train_rows": 410,
+    "test_rows": 90,
+    "feature_cols": [
+      "grid",
+      "grid_known",
+      "round",
+      "driver_avg_finish_5",
+      "driver_points_5",
+      "driver_wins_5",
+      "driver_podiums_5",
+      "driver_avg_finish_3",
+      "constructor_avg_finish_5",
+      "circuit_driver_avg",
+      "circuit_constructor_avg",
+      "season_points",
+      "season_position"
+    ],
+    "backend": "sklearn-gbr"
+  }
+}
