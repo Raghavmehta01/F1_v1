@@ -163,7 +163,9 @@ def build_inference_frame(
             grid = float(grid_by_driver[did])
             grid_known = 1.0
         else:
-            grid = float(st["season_position"])
+            # Neutral midfield until quali/grid — do not leak championship order
+            # into the `grid` feature (that made leaders look ~100% podium).
+            grid = 10.0
             grid_known = 0.0
 
         rows.append(

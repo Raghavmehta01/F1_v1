@@ -46,7 +46,7 @@ class TrainedModel:
             strength = strength * (0.55 + 0.2 * (1.0 - known)) + grid_strength * (
                 0.45 * known
             )
-        win, podium, ranks = win_and_podium_from_strength(strength, temperature=1.9)
+        win, podium, ranks = win_and_podium_from_strength(strength, temperature=1.65)
         out = df.copy()
         out["pred_finish"] = ranks
         out["win_probability"] = win

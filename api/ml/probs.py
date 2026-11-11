@@ -13,14 +13,48 @@ def softmax(x: np.ndarray, temperature: float = 1.0) -> np.ndarray:
     return e / s if s > 0 else np.full_like(e, 1.0 / max(len(e), 1))
 
 
+def _scale_strength(strength: np.ndarray) -> np.ndarray:
+    """Z-score so temperature is scale-invariant across model / heuristic."""
+    s = np.asarray(strength, dtype=float)
+    if len(s) == 0:
+        return s
+    std = float(np.std(s))
+    if std < 1e-6:
+        return np.zeros_like(s)
+    return (s - float(np.mean(s))) / std
+
+
+def _cap_and_renorm(probs: np.ndarray, cap: float) -> np.ndarray:
+    """Clip any mass above `cap` and redistribute to uncapped entries."""
+    out = np.asarray(probs, dtype=float).copy()
+    if len(out) == 0:
+        return out
+    cap = float(cap)
+    for _ in range(len(out) + 2):
+        over = out > cap + 1e-12
+        if not np.any(over):
+            break
+        excess = float(out[over].sum() - cap * int(over.sum()))
+        out[over] = cap
+        under = ~over
+        if not np.any(under) or excess <= 1e-12:
+            break
+        out[under] += excess * (out[under] / out[under].sum())
+    s = float(out.sum())
+    return out / s if s > 0 else out
+
+
 def win_and_podium_from_strength(
     strength: np.ndarray,
     *,
-    temperature: float = 1.8,
+    temperature: float = 1.65,
+    max_win: float = 0.42,
+    max_podium: float = 0.72,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Plackett–Luce with soft removal → win + P(top-3), plus rank order.
 
-    Soft removal avoids the hard-argmax bug that pushed some podium probs to ~1.0.
+    Strength is z-scored before softmax so raw finish gaps cannot push
+    podium probabilities to ~100% (a common board-looking bug).
     """
     n = len(strength)
     if n == 0:
@@ -30,12 +64,13 @@ def win_and_podium_from_strength(
             np.array([], dtype=int),
         )
 
-    win = softmax(strength, temperature=temperature)
+    scaled = _scale_strength(strength)
+    win = softmax(scaled, temperature=temperature)
     podium = np.zeros(n, dtype=float)
     remaining = np.ones(n, dtype=float)
 
     for _ in range(3):
-        masked = strength.copy()
+        masked = scaled.copy()
         masked[remaining <= 1e-12] = -1e9
         slot = softmax(masked, temperature=temperature) * remaining
         total = slot.sum()
@@ -45,8 +80,9 @@ def win_and_podium_from_strength(
         podium += slot
         remaining = np.clip(remaining * (1.0 - slot), 0.0, 1.0)
 
-    # Cap: cannot exceed 1; also cannot be below win prob.
-    podium = np.clip(np.maximum(podium, win), 0.0, 0.999)
+    # Soft caps: F1 fields are noisy; never show near-certainty pre-race.
+    win = _cap_and_renorm(win, max_win)
+    podium = np.clip(np.maximum(podium, win), 0.0, max_podium)
 
     order = np.argsort(-strength)
     ranks = np.empty(n, dtype=int)

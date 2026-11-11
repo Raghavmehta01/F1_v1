@@ -36,13 +36,55 @@ def _cache_path(name: str) -> Path:
     return CACHE_DIR / name
 
 
+def _fetch_season_results_payload(season: int) -> dict[str, Any]:
+    """Paginate Jolpica results — a single page is often only ~100 rows (~5 GPs)."""
+    by_round: dict[str, dict[str, Any]] = {}
+    offset = 0
+    total = None
+    while True:
+        data = _get(f"{season}/results.json?limit=100&offset={offset}")
+        mr = data.get("MRData", {})
+        try:
+            total = int(mr.get("total") or 0)
+        except (TypeError, ValueError):
+            total = 0
+        for race in mr.get("RaceTable", {}).get("Races", []) or []:
+            rnd = str(race.get("round") or "")
+            if not rnd:
+                continue
+            if rnd not in by_round:
+                by_round[rnd] = race
+                continue
+            # Merge mid-race pagination if it ever splits a round.
+            existing = {
+                str(x.get("Driver", {}).get("driverId") or ""): x
+                for x in by_round[rnd].get("Results", []) or []
+            }
+            for row in race.get("Results", []) or []:
+                did = str(row.get("Driver", {}).get("driverId") or "")
+                if did:
+                    existing[did] = row
+            by_round[rnd]["Results"] = list(existing.values())
+        offset += 100
+        if total <= 0 or offset >= total:
+            break
+        time.sleep(0.35)
+    races = sorted(by_round.values(), key=lambda r: int(r.get("round") or 0))
+    return {
+        "MRData": {
+            "total": str(total or 0),
+            "RaceTable": {"season": str(season), "Races": races},
+        }
+    }
+
+
 def load_season_results(season: int, *, use_cache: bool = True) -> pd.DataFrame:
     """One row per driver finish for a season."""
     cache = _cache_path(f"results_{season}.json")
     if use_cache and cache.exists():
         payload = json.loads(cache.read_text())
     else:
-        payload = _get(f"{season}/results.json?limit=1000")
+        payload = _fetch_season_results_payload(season)
         if use_cache:
             cache.write_text(json.dumps(payload))
 
