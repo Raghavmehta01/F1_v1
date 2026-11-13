@@ -185,21 +185,20 @@ export default async function HomePage() {
           aria-hidden
         />
 
-        {/* Two-column hero: copy packed top-left, circuit fills right — no empty voids */}
-        <div className="relative z-10 grid md:grid-cols-2 md:items-stretch">
-          <div className="flex flex-col gap-4 px-4 py-6 sm:gap-5 sm:px-6 sm:py-8 lg:px-10 lg:py-8">
+        <div className="relative z-10 flex h-[calc(100svh-4rem)] max-h-[calc(100svh-4rem)] overflow-hidden">
+          <div className="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:w-[min(34rem,38%)] lg:shrink-0 lg:gap-5 lg:px-8 lg:py-10 xl:w-[min(36rem,36%)] xl:pl-12">
             <div className="space-y-2">
-              <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.1rem,5.5vw,4.25rem)] leading-[0.88] text-[var(--ink)]">
+              <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.35rem,7.2vw,5.25rem)] leading-[0.85] text-[var(--ink)]">
                 Formula 1
               </p>
-              <div className="animate-hero-rise-delay space-y-1">
+              <div className="animate-hero-rise-delay space-y-1.5">
                 <p className="eyebrow !text-[var(--brand)]">
                   {featured?.status === "upcoming" ? "Next up" : "Latest"}
                 </p>
-                <h1 className="font-display text-2xl leading-none tracking-tight text-[var(--ink)] sm:text-3xl">
+                <h1 className="font-display text-3xl leading-none tracking-tight text-[var(--ink)] sm:text-4xl">
                   {raceName}
                 </h1>
-                <p className="max-w-md text-sm leading-snug text-[var(--muted)]">
+                <p className="max-w-lg text-sm leading-relaxed text-[var(--muted)]">
                   {raceMeta}
                   {lastRaceLabel ? ` · ${lastRaceLabel}` : ""}
                 </p>
@@ -217,25 +216,23 @@ export default async function HomePage() {
             ) : null}
           </div>
 
-          {featured ? (
-            <NextRaceBoard
-              race={featured.race}
-              status={featured.status}
-              seasonTotal={races.length}
-              className="min-h-[18rem] border-t border-[var(--line)] md:min-h-[28rem] md:border-l md:border-t-0"
+          <aside className="hidden min-h-0 w-[min(22rem,28%)] shrink-0 flex-col justify-center gap-6 overflow-y-auto border-l border-[var(--line)] px-5 py-8 xl:w-[min(24rem,26%)] xl:px-6 lg:flex">
+            <HeroNews items={headlines} />
+            <HeroLeaders
+              driver={leadDriver}
+              constructor={leadConstructor}
+              round={standingsRound}
+              season={standingsSeason}
             />
-          ) : (
-            <div className="relative hidden min-h-[28rem] border-l border-[var(--line)] md:block">
-              <HeroPack className="!ml-0 h-full w-full" />
-            </div>
-          )}
+          </aside>
+
+          <HeroPack />
         </div>
       </section>
 
-      {/* News + leaders — dense strip under hero (not a tall empty middle column) */}
-      <section className="border-t border-[var(--line)]">
-        <div className="page-wrap grid gap-8 py-6 sm:py-8 lg:grid-cols-2 lg:gap-10">
-          <HeroNews items={headlines} />
+      {/* Mobile: leaders (news column is lg-only). */}
+      <section className="border-t border-[var(--line)] lg:hidden">
+        <div className="page-wrap py-6">
           <HeroLeaders
             driver={leadDriver}
             constructor={leadConstructor}
@@ -244,6 +241,15 @@ export default async function HomePage() {
           />
         </div>
       </section>
+
+      {featured ? (
+        <NextRaceBoard
+          race={featured.race}
+          status={featured.status}
+          seasonTotal={races.length}
+          className="border-t border-[var(--line)] md:min-h-[22rem]"
+        />
+      ) : null}
 
       {topDrivers.length ? (
         <section className="border-t border-[var(--line)]">

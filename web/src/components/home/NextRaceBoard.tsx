@@ -6,11 +6,10 @@ type Props = {
   race: Race;
   status: "upcoming" | "completed";
   seasonTotal?: number;
-  /** Fill a hero column (no outer section padding). */
   className?: string;
 };
 
-/** Compact next-race panel: animated circuit + links — for use inside the hero. */
+/** Next-race strip with animated circuit — sits below the poster hero. */
 export function NextRaceBoard({
   race,
   status,
@@ -21,46 +20,50 @@ export function NextRaceBoard({
   const loc = race.Circuit.Location;
   const eyebrow =
     status === "upcoming"
-      ? `R${String(round).padStart(2, "0")} · Up next`
-      : `R${String(round).padStart(2, "0")} · Latest`;
+      ? `Round ${String(round).padStart(2, "0")} · Up next`
+      : `Round ${String(round).padStart(2, "0")} · Latest`;
 
   return (
-    <div
-      className={`flex h-full min-h-0 flex-col bg-[var(--bg-elevated)] ${className}`}
-    >
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-3 sm:px-5">
-        <div className="min-w-0">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--brand)]">
-            {eyebrow}
-            {loc.country ? ` · ${loc.country}` : ""}
-          </p>
-          <p className="mt-0.5 truncate font-mono text-[11px] text-[var(--muted)]">
-            {race.Circuit.circuitName}
-            {Number.isFinite(seasonTotal) && seasonTotal! > 0
-              ? ` · ${round}/${seasonTotal}`
-              : ""}
-          </p>
+    <section className={`bg-[var(--bg-elevated)] ${className}`}>
+      <div className="grid md:grid-cols-2 md:items-stretch">
+        <div className="flex flex-col justify-center gap-4 px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+          <div className="space-y-1.5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--brand)]">
+              {eyebrow}
+              {loc.country ? ` · ${loc.country}` : ""}
+            </p>
+            <h2 className="font-display text-2xl tracking-tight text-[var(--ink)] sm:text-3xl">
+              {race.raceName}
+            </h2>
+            <p className="max-w-md text-sm text-[var(--muted)]">
+              {race.Circuit.circuitName}
+              {loc.locality ? ` · ${loc.locality}` : ""}
+              {Number.isFinite(seasonTotal) && seasonTotal! > 0
+                ? ` · ${round} of ${seasonTotal}`
+                : ""}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={`/races/${race.season}/${race.round}`}
+              className="btn-primary"
+            >
+              Race weekend
+            </Link>
+            <Link
+              href={`/circuits/${race.Circuit.circuitId}`}
+              className="btn-ghost"
+            >
+              Explore track
+            </Link>
+          </div>
         </div>
-        <div className="flex shrink-0 gap-2">
-          <Link
-            href={`/races/${race.season}/${race.round}`}
-            className="btn-primary !px-3 !py-1.5 !text-[10px]"
-          >
-            Weekend
-          </Link>
-          <Link
-            href={`/circuits/${race.Circuit.circuitId}`}
-            className="btn-ghost !px-3 !py-1.5 !text-[10px]"
-          >
-            Track
-          </Link>
-        </div>
+        <CircuitLightsMap
+          circuitId={race.Circuit.circuitId}
+          label={race.Circuit.circuitName}
+          className="min-h-[14rem] border-t border-[var(--line)] md:min-h-[20rem] md:border-l md:border-t-0"
+        />
       </div>
-      <CircuitLightsMap
-        circuitId={race.Circuit.circuitId}
-        label={race.Circuit.circuitName}
-        className="min-h-0 flex-1 !aspect-auto border-0 bg-transparent"
-      />
-    </div>
+    </section>
   );
 }
