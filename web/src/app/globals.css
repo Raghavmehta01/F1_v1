@@ -505,8 +505,18 @@ html[data-theme="light"] .loader-car-img {
   animation: circuit-light-run 5.5s linear infinite;
 }
 
+.circuit-light-trail--hero {
+  stroke-dasharray: 6 94;
+  animation-duration: 11s;
+  opacity: 0.85;
+}
+
 .circuit-light-head {
   filter: drop-shadow(0 0 10px var(--live)) drop-shadow(0 0 4px #fff);
+}
+
+.circuit-light-head--hero {
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--brand) 55%, transparent));
 }
 
 @keyframes circuit-light-run {

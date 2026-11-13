@@ -1,9 +1,9 @@
 import Link from "next/link";
+import { CircuitLightsMap } from "@/components/home/CircuitLightsMap";
 import { HeroLeaders } from "@/components/home/HeroLeaders";
 import { HeroPack } from "@/components/home/HeroPack";
 import { HeroRankings } from "@/components/home/HeroRankings";
 import { NewsTicker } from "@/components/home/NewsTicker";
-import { NextRaceBoard } from "@/components/home/NextRaceBoard";
 import { RaceStrip } from "@/components/home/RaceStrip";
 import { RaceWeekendTimes } from "@/components/home/RaceWeekendTimes";
 import { SessionCountdown } from "@/components/home/SessionCountdown";
@@ -188,7 +188,7 @@ export default async function HomePage() {
         <NewsTicker items={headlines} />
 
         <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden lg:h-[calc(100svh-4rem-2.75rem)] lg:max-h-[calc(100svh-4rem-2.75rem)] lg:flex-row">
-          <div className="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:w-[min(32rem,36%)] lg:shrink-0 lg:gap-5 lg:px-8 lg:py-10 xl:pl-12">
+          <div className="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:w-[min(30rem,34%)] lg:shrink-0 lg:gap-5 lg:px-8 lg:py-10 xl:pl-12">
             <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.35rem,7.2vw,5.25rem)] leading-[0.85] text-[var(--ink)]">
               Formula 1
             </p>
@@ -215,31 +215,43 @@ export default async function HomePage() {
             {sessions.length ? (
               <RaceWeekendTimes sessions={sessions} />
             ) : null}
-          </div>
 
-          {/* Center rail — Leaders aligned mid-column */}
-          <aside className="flex w-full shrink-0 justify-center border-t border-[var(--line)] px-4 py-6 sm:px-6 lg:w-[min(22rem,26%)] lg:items-center lg:border-l lg:border-t-0 lg:px-5 lg:py-8">
             <HeroLeaders
               driver={leadDriver}
               constructor={leadConstructor}
               round={standingsRound}
               season={standingsSeason}
-              className="mx-auto"
             />
-          </aside>
+          </div>
 
-          <HeroPack />
+          {featured ? (
+            <aside className="relative flex min-h-[16rem] w-full min-w-0 flex-1 flex-col border-t border-[var(--line)] lg:min-h-0 lg:max-w-[min(28rem,34%)] lg:border-l lg:border-t-0">
+              <div className="flex items-center justify-between gap-3 px-4 pt-4 sm:px-5 lg:px-6">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+                  {featured.status === "upcoming" ? "Next circuit" : "Latest circuit"}
+                  {featured.race.Circuit.Location.country
+                    ? ` · ${featured.race.Circuit.Location.country}`
+                    : ""}
+                </p>
+                <Link
+                  href={`/circuits/${featured.race.Circuit.circuitId}`}
+                  className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)] transition-colors hover:text-[var(--brand)]"
+                >
+                  Track →
+                </Link>
+              </div>
+              <CircuitLightsMap
+                circuitId={featured.race.Circuit.circuitId}
+                label={featured.race.Circuit.circuitName}
+                variant="hero"
+                className="min-h-[14rem] flex-1"
+              />
+            </aside>
+          ) : null}
+
+          <HeroPack className="lg:max-w-[min(36rem,40%)]" />
         </div>
       </section>
-
-      {featured ? (
-        <NextRaceBoard
-          race={featured.race}
-          status={featured.status}
-          seasonTotal={races.length}
-          className="border-t border-[var(--line)] md:min-h-[22rem]"
-        />
-      ) : null}
 
       {topDrivers.length ? (
         <section className="border-t border-[var(--line)]">
