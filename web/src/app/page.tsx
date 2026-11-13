@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { HeroLeaders } from "@/components/home/HeroLeaders";
 import { HeroNews } from "@/components/home/HeroNews";
-import { HeroPack } from "@/components/home/HeroPack";
 import { HeroRankings } from "@/components/home/HeroRankings";
+import { NextRaceBoard } from "@/components/home/NextRaceBoard";
 import { RaceStrip } from "@/components/home/RaceStrip";
 import { RaceWeekendTimes } from "@/components/home/RaceWeekendTimes";
+import { SessionCountdown } from "@/components/home/SessionCountdown";
 import { TeamStageCard } from "@/components/standings/TeamStageCard";
 import { getF1Headlines, type F1Headline } from "@/lib/data/f1-news";
 import {
@@ -24,8 +25,7 @@ import { findNextSession } from "@/lib/data/next-session";
 import { raceSessionSlots } from "@/lib/data/race-sessions";
 import { teamColor } from "@/lib/media/team-colors";
 import type { ConstructorStanding, Race } from "@/lib/data/types";
-import { NextRaceBoard } from "@/components/home/NextRaceBoard";
-import { SessionCountdown } from "@/components/home/SessionCountdown";
+import { HeroPack } from "@/components/home/HeroPack";
 
 export const revalidate = 120;
 
@@ -185,17 +185,17 @@ export default async function HomePage() {
           aria-hidden
         />
 
-        <div className="relative z-10 flex h-[calc(100svh-4rem)] max-h-[calc(100svh-4rem)] overflow-hidden">
-          <div className="flex min-h-0 w-full min-w-0 flex-col justify-between gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:w-[min(34rem,38%)] lg:shrink-0 lg:px-8 lg:py-12 xl:w-[min(36rem,36%)] xl:pl-12">
-            <div className="flex min-w-0 flex-col space-y-4">
-              <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.35rem,7.2vw,5.25rem)] leading-[0.85] text-[var(--ink)]">
+        <div className="relative z-10 flex min-h-[calc(100svh-4rem)] flex-col lg:h-[calc(100svh-4rem)] lg:max-h-[calc(100svh-4rem)] lg:flex-row lg:overflow-hidden">
+          <div className="flex min-h-0 w-full min-w-0 flex-col justify-between gap-5 px-4 py-6 sm:px-6 sm:py-8 lg:w-[min(32rem,36%)] lg:shrink-0 lg:gap-6 lg:px-8 lg:py-8 xl:w-[min(34rem,34%)] xl:pl-10">
+            <div className="flex min-w-0 flex-col space-y-3">
+              <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.2rem,6.5vw,4.75rem)] leading-[0.85] text-[var(--ink)]">
                 Formula 1
               </p>
-              <div className="animate-hero-rise-delay space-y-2">
+              <div className="animate-hero-rise-delay space-y-1.5">
                 <p className="eyebrow !text-[var(--brand)]">
                   {featured?.status === "upcoming" ? "Next up" : "Latest"}
                 </p>
-                <h1 className="font-display text-3xl leading-none tracking-tight text-[var(--ink)] sm:text-4xl">
+                <h1 className="font-display text-2xl leading-none tracking-tight text-[var(--ink)] sm:text-3xl lg:text-4xl">
                   {raceName}
                 </h1>
                 <p className="max-w-lg text-sm leading-relaxed text-[var(--muted)]">
@@ -205,7 +205,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {nextSession ? (
                 <SessionCountdown
                   targetIso={nextSession.slot.at}
@@ -214,13 +214,11 @@ export default async function HomePage() {
               ) : null}
               {sessions.length ? (
                 <RaceWeekendTimes sessions={sessions} />
-              ) : !nextSession ? (
-                <div className="flex-1" aria-hidden />
               ) : null}
             </div>
           </div>
 
-          <aside className="hidden min-h-0 w-[min(22rem,28%)] shrink-0 flex-col justify-center gap-8 overflow-y-auto border-l border-[var(--line)] px-5 py-10 xl:w-[min(24rem,26%)] xl:px-6 lg:flex">
+          <aside className="hidden min-h-0 w-[min(18rem,22%)] shrink-0 flex-col justify-center gap-5 overflow-y-auto border-l border-[var(--line)] px-4 py-6 xl:w-[min(20rem,22%)] xl:px-5 lg:flex">
             <HeroNews items={headlines} />
             <HeroLeaders
               driver={leadDriver}
@@ -229,27 +227,35 @@ export default async function HomePage() {
               season={standingsSeason}
             />
           </aside>
-          <HeroPack />
+
+          {featured ? (
+            <NextRaceBoard
+              race={featured.race}
+              status={featured.status}
+              seasonTotal={races.length}
+              className="hidden min-h-0 min-w-0 flex-1 md:flex"
+            />
+          ) : (
+            <HeroPack />
+          )}
+
+          {/* Mobile: circuit under hero copy */}
+          {featured ? (
+            <div className="border-t border-[var(--line)] md:hidden">
+              <NextRaceBoard
+                race={featured.race}
+                status={featured.status}
+                seasonTotal={races.length}
+                className="!border-l-0"
+              />
+            </div>
+          ) : null}
         </div>
       </section>
 
-      {featured ? (
-        <NextRaceBoard
-          race={featured.race}
-          status={featured.status}
-          countdownIso={nextSession?.slot.at}
-          countdownLabel={
-            nextSession
-              ? `${nextSession.slot.label} · ${nextSession.race.raceName}`
-              : featured.race.raceName
-          }
-          seasonTotal={races.length}
-        />
-      ) : null}
-
       {/* Mobile: leaders sit below the hero (news column is lg-only). */}
       <section className="border-t border-[var(--line)] lg:hidden">
-        <div className="page-wrap py-8">
+        <div className="page-wrap py-6">
           <HeroLeaders
             driver={leadDriver}
             constructor={leadConstructor}
@@ -261,7 +267,7 @@ export default async function HomePage() {
 
       {topDrivers.length ? (
         <section className="border-t border-[var(--line)]">
-          <div className="page-wrap py-12 sm:py-14">
+          <div className="page-wrap py-8 sm:py-10">
             <HeroRankings
               drivers={topDrivers}
               round={standingsRound}
@@ -275,7 +281,7 @@ export default async function HomePage() {
 
       {constructors.length ? (
         <section className="border-t border-[var(--line)]">
-          <div className="page-wrap space-y-6 py-12 sm:py-14">
+          <div className="page-wrap space-y-5 py-8 sm:py-10">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <p className="eyebrow">Constructors</p>

@@ -30,7 +30,7 @@ export function CircuitLightsMap({
 
   return (
     <div
-      className={`circuit-lights-map relative aspect-[4/3] w-full overflow-hidden bg-[var(--bg-soft)] ${className}`}
+      className={`circuit-lights-map relative aspect-[4/3] h-full w-full overflow-hidden bg-[var(--bg-soft)] ${className}`}
       role="img"
       aria-label={label ?? track?.name ?? "Circuit map"}
     >
