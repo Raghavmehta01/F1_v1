@@ -501,12 +501,12 @@ html[data-theme="light"] .loader-car-img {
 
 /* --- Circuit moving light --- */
 .circuit-light-trail {
-  stroke-dasharray: 10 90;
-  animation: circuit-light-run 7.5s linear infinite;
+  stroke-dasharray: 14 86;
+  animation: circuit-light-run 5.5s linear infinite;
 }
 
 .circuit-light-head {
-  filter: drop-shadow(0 0 6px var(--live));
+  filter: drop-shadow(0 0 10px var(--live)) drop-shadow(0 0 4px #fff);
 }
 
 @keyframes circuit-light-run {

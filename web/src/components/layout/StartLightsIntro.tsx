@@ -25,10 +25,17 @@ export function StartLightsIntro() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced || sessionStorage.getItem(STORAGE_KEY) === "1") {
+    const force =
+      new URLSearchParams(window.location.search).get("lights") === "1";
+    if (reduced) {
       setPhase("done");
       return;
     }
+    if (!force && sessionStorage.getItem(STORAGE_KEY) === "1") {
+      setPhase("done");
+      return;
+    }
+    if (force) sessionStorage.removeItem(STORAGE_KEY);
     setVisible(true);
     setPhase("arming");
     const t = window.setTimeout(() => setPhase("lighting"), 280);

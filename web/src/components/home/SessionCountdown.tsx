@@ -59,10 +59,7 @@ function TwinClocks({ now }: { now: number }) {
         <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--muted)]">
           Local{tz ? ` · ${tz.label}` : ""}
         </p>
-        <p
-          className="mt-1 font-mono text-sm tracking-tight text-[var(--ink)] sm:text-base"
-          suppressHydrationWarning
-        >
+        <p className="mt-1 font-mono text-sm tracking-tight text-[var(--ink)] sm:text-base">
           {local}
         </p>
       </div>
@@ -70,10 +67,7 @@ function TwinClocks({ now }: { now: number }) {
         <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--muted)]">
           International · UTC
         </p>
-        <p
-          className="mt-1 font-mono text-sm tracking-tight text-[var(--ink)] sm:text-base"
-          suppressHydrationWarning
-        >
+        <p className="mt-1 font-mono text-sm tracking-tight text-[var(--ink)] sm:text-base">
           {utc}
         </p>
       </div>
@@ -92,15 +86,33 @@ export function SessionCountdown({
   className?: string;
 }) {
   const targetMs = Date.parse(targetIso);
-  const [now, setNow] = useState(() => Date.now());
+  /** Avoid SSR/client second mismatch → React hydration "1 Issue". */
+  const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
     if (!Number.isFinite(targetMs)) return;
+    setNow(Date.now());
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, [targetMs]);
 
   if (!Number.isFinite(targetMs)) return null;
+
+  if (now == null) {
+    return (
+      <div
+        className={`border border-[var(--line)] bg-[var(--bg-elevated)] px-4 py-3 sm:px-5 sm:py-4 ${className}`}
+        aria-live="polite"
+      >
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+          Countdown · {label}
+        </p>
+        <p className="mt-2 font-mono text-2xl tracking-tight text-[var(--muted)] sm:text-3xl">
+          --:--:--
+        </p>
+      </div>
+    );
+  }
 
   const { diff, days, hours, mins, secs } = partsUntil(targetMs, now);
   if (diff <= 0) {
