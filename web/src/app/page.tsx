@@ -185,77 +185,57 @@ export default async function HomePage() {
           aria-hidden
         />
 
-        <div className="relative z-10 flex min-h-[calc(100svh-4rem)] flex-col lg:h-[calc(100svh-4rem)] lg:max-h-[calc(100svh-4rem)] lg:flex-row lg:overflow-hidden">
-          <div className="flex min-h-0 w-full min-w-0 flex-col justify-between gap-5 px-4 py-6 sm:px-6 sm:py-8 lg:w-[min(32rem,36%)] lg:shrink-0 lg:gap-6 lg:px-8 lg:py-8 xl:w-[min(34rem,34%)] xl:pl-10">
-            <div className="flex min-w-0 flex-col space-y-3">
-              <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.2rem,6.5vw,4.75rem)] leading-[0.85] text-[var(--ink)]">
+        {/* Two-column hero: copy packed top-left, circuit fills right — no empty voids */}
+        <div className="relative z-10 grid md:grid-cols-2 md:items-stretch">
+          <div className="flex flex-col gap-4 px-4 py-6 sm:gap-5 sm:px-6 sm:py-8 lg:px-10 lg:py-8">
+            <div className="space-y-2">
+              <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.1rem,5.5vw,4.25rem)] leading-[0.88] text-[var(--ink)]">
                 Formula 1
               </p>
-              <div className="animate-hero-rise-delay space-y-1.5">
+              <div className="animate-hero-rise-delay space-y-1">
                 <p className="eyebrow !text-[var(--brand)]">
                   {featured?.status === "upcoming" ? "Next up" : "Latest"}
                 </p>
-                <h1 className="font-display text-2xl leading-none tracking-tight text-[var(--ink)] sm:text-3xl lg:text-4xl">
+                <h1 className="font-display text-2xl leading-none tracking-tight text-[var(--ink)] sm:text-3xl">
                   {raceName}
                 </h1>
-                <p className="max-w-lg text-sm leading-relaxed text-[var(--muted)]">
+                <p className="max-w-md text-sm leading-snug text-[var(--muted)]">
                   {raceMeta}
                   {lastRaceLabel ? ` · ${lastRaceLabel}` : ""}
                 </p>
               </div>
             </div>
 
-            <div className="space-y-3">
-              {nextSession ? (
-                <SessionCountdown
-                  targetIso={nextSession.slot.at}
-                  label={`${nextSession.slot.label} · ${nextSession.race.raceName}`}
-                />
-              ) : null}
-              {sessions.length ? (
-                <RaceWeekendTimes sessions={sessions} />
-              ) : null}
-            </div>
+            {nextSession ? (
+              <SessionCountdown
+                targetIso={nextSession.slot.at}
+                label={`${nextSession.slot.label} · ${nextSession.race.raceName}`}
+              />
+            ) : null}
+            {sessions.length ? (
+              <RaceWeekendTimes sessions={sessions} />
+            ) : null}
           </div>
-
-          <aside className="hidden min-h-0 w-[min(18rem,22%)] shrink-0 flex-col justify-center gap-5 overflow-y-auto border-l border-[var(--line)] px-4 py-6 xl:w-[min(20rem,22%)] xl:px-5 lg:flex">
-            <HeroNews items={headlines} />
-            <HeroLeaders
-              driver={leadDriver}
-              constructor={leadConstructor}
-              round={standingsRound}
-              season={standingsSeason}
-            />
-          </aside>
 
           {featured ? (
             <NextRaceBoard
               race={featured.race}
               status={featured.status}
               seasonTotal={races.length}
-              className="hidden min-h-0 min-w-0 flex-1 md:flex"
+              className="min-h-[18rem] border-t border-[var(--line)] md:min-h-[28rem] md:border-l md:border-t-0"
             />
           ) : (
-            <HeroPack />
-          )}
-
-          {/* Mobile: circuit under hero copy */}
-          {featured ? (
-            <div className="border-t border-[var(--line)] md:hidden">
-              <NextRaceBoard
-                race={featured.race}
-                status={featured.status}
-                seasonTotal={races.length}
-                className="!border-l-0"
-              />
+            <div className="relative hidden min-h-[28rem] border-l border-[var(--line)] md:block">
+              <HeroPack className="!ml-0 h-full w-full" />
             </div>
-          ) : null}
+          )}
         </div>
       </section>
 
-      {/* Mobile: leaders sit below the hero (news column is lg-only). */}
-      <section className="border-t border-[var(--line)] lg:hidden">
-        <div className="page-wrap py-6">
+      {/* News + leaders — dense strip under hero (not a tall empty middle column) */}
+      <section className="border-t border-[var(--line)]">
+        <div className="page-wrap grid gap-8 py-6 sm:py-8 lg:grid-cols-2 lg:gap-10">
+          <HeroNews items={headlines} />
           <HeroLeaders
             driver={leadDriver}
             constructor={leadConstructor}

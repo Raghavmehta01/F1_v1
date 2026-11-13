@@ -26,7 +26,7 @@ export function NextRaceBoard({
 
   return (
     <div
-      className={`flex h-full min-h-0 flex-col border-l border-[var(--line)] bg-[var(--bg-elevated)] ${className}`}
+      className={`flex h-full min-h-0 flex-col bg-[var(--bg-elevated)] ${className}`}
     >
       <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--line)] px-4 py-3 sm:px-5">
         <div className="min-w-0">
