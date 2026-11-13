@@ -6,7 +6,7 @@ import Image from "next/image";
 export function HeroPack({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`relative ml-auto hidden h-full min-w-0 flex-1 animate-hero-media md:block ${className}`}
+      className={`relative ml-auto hidden h-full min-w-0 flex-1 animate-hero-media lg:block ${className}`}
     >
       <Image
         src="/hero/drivers-pack.png"
@@ -14,7 +14,7 @@ export function HeroPack({ className = "" }: { className?: string }) {
         fill
         priority
         quality={92}
-        sizes="(min-width: 768px) 50vw, 0px"
+        sizes="(min-width: 1024px) 50vw, 0px"
         className="object-contain object-right object-bottom"
       />
     </div>

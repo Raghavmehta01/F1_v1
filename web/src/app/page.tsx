@@ -184,17 +184,17 @@ export default async function HomePage() {
           aria-hidden
         />
 
-        <div className="relative z-10 flex h-[calc(100svh-4rem)] max-h-[calc(100svh-4rem)] overflow-hidden">
-          <div className="flex min-h-0 w-full min-w-0 flex-col justify-between gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:w-[min(34rem,38%)] lg:shrink-0 lg:px-8 lg:py-12 xl:w-[min(36rem,36%)] xl:pl-12">
-            <div className="flex min-w-0 flex-col space-y-4">
-              <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.35rem,7.2vw,5.25rem)] leading-[0.85] text-[var(--ink)]">
+        <div className="relative z-10 flex flex-col lg:h-[calc(100svh-var(--header-h))] lg:max-h-[calc(100svh-var(--header-h))] lg:flex-row lg:overflow-hidden">
+          <div className="flex w-full min-w-0 flex-col gap-5 px-4 py-5 sm:gap-6 sm:px-6 sm:py-8 lg:h-full lg:w-[min(34rem,38%)] lg:shrink-0 lg:justify-between lg:gap-8 lg:overflow-y-auto lg:px-8 lg:py-12 xl:w-[min(36rem,36%)] xl:pl-12">
+            <div className="flex min-w-0 flex-col space-y-3 sm:space-y-4">
+              <p className="font-display animate-hero-rise max-w-full text-[clamp(1.85rem,8vw,5.25rem)] leading-[0.95] tracking-tight text-[var(--ink)]">
                 Formula 1
               </p>
-              <div className="animate-hero-rise-delay space-y-2">
+              <div className="animate-hero-rise-delay space-y-1.5 sm:space-y-2">
                 <p className="eyebrow !text-[var(--brand)]">
                   {featured?.status === "upcoming" ? "Next up" : "Latest"}
                 </p>
-                <h1 className="font-display text-3xl leading-none tracking-tight text-[var(--ink)] sm:text-4xl">
+                <h1 className="font-display text-[1.75rem] leading-none tracking-tight text-[var(--ink)] sm:text-4xl">
                   {raceName}
                 </h1>
                 <p className="max-w-lg text-sm leading-relaxed text-[var(--muted)]">
@@ -214,7 +214,7 @@ export default async function HomePage() {
               {sessions.length ? (
                 <RaceWeekendTimes sessions={sessions} />
               ) : !nextSession ? (
-                <div className="flex-1" aria-hidden />
+                <div className="hidden flex-1 lg:block" aria-hidden />
               ) : null}
             </div>
           </div>
@@ -234,7 +234,7 @@ export default async function HomePage() {
 
       {/* Mobile: leaders sit below the hero (news column is lg-only). */}
       <section className="border-t border-[var(--line)] lg:hidden">
-        <div className="page-wrap py-8">
+        <div className="page-wrap py-6 sm:py-8">
           <HeroLeaders
             driver={leadDriver}
             constructor={leadConstructor}

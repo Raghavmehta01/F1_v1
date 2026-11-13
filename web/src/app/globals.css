@@ -16,7 +16,8 @@
   --live: #f0a500;
   --gain: #2ecc71;
   --radius: 2px;
-  --header-h: 4rem;
+  /* Mobile header is logo row + scroll nav; desktop is single 4rem bar */
+  --header-h: 5.75rem;
   --hero-glow: #1a1e22;
   --hero-media-plate: #0e1012;
   --hero-stripe: rgba(255, 255, 255, 0.045);
@@ -41,6 +42,14 @@
   --hero-media-plate: #121416;
   --hero-stripe: rgba(16, 17, 20, 0.04);
   --grain-opacity: 0.04;
+}
+
+@media (min-width: 768px) {
+  :root,
+  [data-theme="dark"],
+  [data-theme="light"] {
+    --header-h: 4rem;
+  }
 }
 
 html {

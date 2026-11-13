@@ -61,7 +61,10 @@ export function RaceWeekendTimes({
       <div className="flex items-end justify-between gap-3">
         <p className="eyebrow !normal-case tracking-[0.16em]">Weekend times</p>
         <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--muted)]">
-          {localShort} · UTC
+          <span className="sm:hidden">{localShort}</span>
+          <span className="hidden sm:inline">
+            {localShort} · UTC
+          </span>
         </p>
       </div>
       <ol className="divide-y divide-[var(--line)] border-y border-[var(--line)]">
@@ -71,17 +74,17 @@ export function RaceWeekendTimes({
           return (
             <li
               key={s.id}
-              className="grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-baseline gap-x-4 py-2.5 text-sm"
+              className="flex flex-col gap-0.5 py-2.5 sm:grid sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:items-baseline sm:gap-x-4 sm:py-2.5"
             >
-              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)] sm:text-[11px]">
                 {s.label}
               </span>
-              <span className="min-w-0 text-[var(--ink)]" suppressHydrationWarning>
+              <span className="min-w-0 text-sm text-[var(--ink)]" suppressHydrationWarning>
                 <span className="font-medium">{local.day}</span>
                 <span className="text-[var(--muted)]"> · </span>
                 <span className="font-mono">{local.time}</span>
               </span>
-              <span className="shrink-0 font-mono text-xs text-[var(--muted)]">
+              <span className="font-mono text-[11px] text-[var(--muted)] sm:text-xs">
                 {utc.time} UTC
               </span>
             </li>

@@ -50,26 +50,26 @@ export function HeroLeaders({
         </Link>
       </div>
 
-      <div className="grid gap-2">
+      <div className="divide-y divide-[var(--line)] border-y border-[var(--line)]">
         {driver ? (
           <Link
             href={`/drivers/${driver.id}`}
-            className="group flex items-center gap-3 border border-[var(--line)] px-3 py-2.5 transition-colors hover:bg-[var(--bg-elevated)]"
+            className="group grid grid-cols-[3.1rem_2rem_minmax(0,1fr)_auto] items-center gap-x-2 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--bg-elevated)_55%,transparent)] sm:grid-cols-[3.5rem_2.5rem_minmax(0,1fr)_auto] sm:gap-x-3"
           >
-            <span className="w-12 shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
+            <span className="truncate font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
               Driver
             </span>
             <DriverPortrait
               src={driver.shot}
               alt={driver.name}
               accent={driver.color}
-              className="h-11 w-11 shrink-0"
+              className="h-9 w-9 sm:h-11 sm:w-11"
               sizes="44px"
             />
-            <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ink)] group-hover:text-[var(--brand)] sm:text-base">
+            <span className="min-w-0 truncate text-sm font-medium text-[var(--ink)] group-hover:text-[var(--brand)] sm:text-base">
               {driver.name}
             </span>
-            <span className="shrink-0 font-mono text-sm text-[var(--ink)] sm:text-base">
+            <span className="shrink-0 font-mono text-sm tabular-nums text-[var(--ink)] sm:text-base">
               {driver.points}
             </span>
           </Link>
@@ -78,21 +78,21 @@ export function HeroLeaders({
         {ctor ? (
           <Link
             href={`/constructors/${ctor.id}`}
-            className="group flex items-center gap-3 border border-[var(--line)] px-3 py-2.5 transition-colors hover:bg-[var(--bg-elevated)]"
+            className="group grid grid-cols-[3.1rem_2rem_minmax(0,1fr)_auto] items-center gap-x-2 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--bg-elevated)_55%,transparent)] sm:grid-cols-[3.5rem_2.5rem_minmax(0,1fr)_auto] sm:gap-x-3"
           >
-            <span className="w-12 shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
+            <span className="truncate font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
               Team
             </span>
             <TeamLogoChip
               src={ctor.logo}
               accent={ctor.color}
-              className="h-11 w-11"
+              className="h-9 w-9 sm:h-11 sm:w-11"
               sizes="44px"
             />
-            <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ink)] group-hover:text-[var(--brand)] sm:text-base">
+            <span className="min-w-0 truncate text-sm font-medium text-[var(--ink)] group-hover:text-[var(--brand)] sm:text-base">
               {ctor.name}
             </span>
-            <span className="shrink-0 font-mono text-sm text-[var(--ink)] sm:text-base">
+            <span className="shrink-0 font-mono text-sm tabular-nums text-[var(--ink)] sm:text-base">
               {ctor.points}
             </span>
           </Link>

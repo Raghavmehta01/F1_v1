@@ -54,9 +54,9 @@ function TwinClocks({ now }: { now: number }) {
   const utc = tz ? formatClock(now, "UTC") : "--:--:--";
 
   return (
-    <div className="mt-3 grid grid-cols-2 gap-3 border-t border-[var(--line)] pt-3">
-      <div>
-        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--muted)]">
+    <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[var(--line)] pt-3 sm:gap-3">
+      <div className="min-w-0">
+        <p className="truncate font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--muted)]">
           Local{tz ? ` · ${tz.label}` : ""}
         </p>
         <p
@@ -66,8 +66,8 @@ function TwinClocks({ now }: { now: number }) {
           {local}
         </p>
       </div>
-      <div>
-        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--muted)]">
+      <div className="min-w-0">
+        <p className="truncate font-mono text-[9px] uppercase tracking-[0.16em] text-[var(--muted)]">
           International · UTC
         </p>
         <p
@@ -108,7 +108,7 @@ export function SessionCountdown({
       <div
         className={`border border-[var(--live)]/50 bg-[var(--bg-elevated)] px-4 py-3 sm:px-5 sm:py-4 ${className}`}
       >
-        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--live)]">
+        <p className="truncate font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--live)]">
           {label}
         </p>
         <p className="mt-1 font-display text-xl tracking-tight text-[var(--ink)]">
@@ -124,10 +124,10 @@ export function SessionCountdown({
       className={`border border-[var(--line)] bg-[var(--bg-elevated)] px-4 py-3 sm:px-5 sm:py-4 ${className}`}
       aria-live="polite"
     >
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+      <p className="truncate font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
         Countdown · {label}
       </p>
-      <p className="mt-2 font-mono text-2xl tracking-tight text-[var(--ink)] sm:text-3xl">
+      <p className="mt-2 font-mono text-xl tracking-tight text-[var(--ink)] sm:text-3xl">
         {days > 0 ? (
           <>
             <span className="text-[var(--brand)]">{days}</span>
