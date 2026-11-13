@@ -36,7 +36,8 @@ export const metadata: Metadata = {
   creator: "Raghav Mehta",
   publisher: "Raghav Mehta",
   other: {
-    copyright: "© 2026 Raghav Mehta. All rights reserved.",
+    copyright:
+      "© 2026 Raghav Mehta. Pitwall — Apache License 2.0. Fan-made; not affiliated with F1 / FIA.",
   },
   icons: {
     icon: [

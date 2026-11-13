@@ -22,8 +22,9 @@ export function Footer() {
               <span>Pitwall</span>
             </div>
             <p className="max-w-md text-sm leading-relaxed text-[var(--muted)]">
-              Fan-built race intelligence — standings, live timing, and regs
-              chat. Independent project; not an official Formula 1 product.
+              Fan-made race intelligence — standings, live timing, and regs
+              chat. Independent open-source project; nothing to do with the
+              FIA, Formula 1 companies, or teams.
             </p>
             <p className="text-sm text-[var(--ink)]">
               Developed by{" "}
@@ -67,12 +68,15 @@ export function Footer() {
 
         <div className="space-y-3 border-t border-[var(--line)] pt-6 text-xs leading-relaxed text-[var(--muted)]">
           <p>
-            © {YEAR} Raghav Mehta. Pitwall software, design, and original site
-            assets are reserved. All rights reserved.
+            © {YEAR} Raghav Mehta. Pitwall is open source under the Apache
+            License 2.0. Copyright and attribution notices must be retained
+            (see LICENSE and NOTICE).
           </p>
           <p>
-            Formula 1, F1, Grand Prix, related names, and logos are trademarks
-            of Formula One Licensing B.V. and/or their respective owners. FIA
+            Fan-made only — not an official Formula 1 product and has nothing
+            to do with the FIA, Formula 1 companies, teams, or drivers. Formula
+            1, F1, Grand Prix, related names, and logos are trademarks of
+            Formula One Licensing B.V. and/or their respective owners. FIA
             sporting and technical regulations remain © Fédération
             Internationale de l&apos;Automobile. Official imagery from the
             Formula 1 media CDN remains property of its rights holders and is
@@ -98,8 +102,8 @@ export function Footer() {
             >
               OpenF1
             </a>
-            . Pitwall is not affiliated with, endorsed by, or associated with
-            Formula 1 companies, the FIA, teams, or drivers.
+            . Not affiliated with, endorsed by, or associated with Formula 1
+            companies, the FIA, teams, or drivers.
           </p>
           <p>
             Connect:{" "}

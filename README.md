@@ -2,11 +2,17 @@
 
 Formula 1 hub: standings, calendar, results, history, ML race predictions, and an agentic chat assistant.
 
-**Brand:** Pitwall · **Developer:** [Raghav Mehta](https://www.linkedin.com/in/raghavmehta1/) · **Default theme:** dark · **Chat model:** Llama 3.3 70B (Groq) · **ML:** LightGBM (FastAPI)
+**Brand:** Pitwall · **Creator:** [Raghav Mehta](https://www.linkedin.com/in/raghavmehta1/) · **Default theme:** dark · **Chat model:** Llama 3.3 70B (Groq) · **ML:** LightGBM (FastAPI)
 
-© 2026 Raghav Mehta. Pitwall software and original site assets — all rights reserved.
+## Fan-made / unofficial
 
-Not affiliated with Formula 1 companies or the FIA. Data via [Jolpica](https://github.com/jolpica/jolpica-f1) and [OpenF1](https://openf1.org/).
+**Pitwall is a fan-made, independent open-source project.**  
+It has **nothing to do with** Formula 1 commercial entities, the FIA, teams, or drivers. Not affiliated with, endorsed by, sponsored by, or associated with any of them. Data via [Jolpica](https://github.com/jolpica/jolpica-f1) and [OpenF1](https://openf1.org/).
+
+## License & attribution
+
+© 2026 Raghav Mehta. Licensed under the [Apache License 2.0](LICENSE).  
+Attribution and redistributor obligations are in [NOTICE](NOTICE). Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Imagery
 
