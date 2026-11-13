@@ -225,8 +225,8 @@ export default async function HomePage() {
           </div>
 
           {featured ? (
-            <aside className="relative flex min-h-[16rem] w-full min-w-0 flex-1 flex-col border-t border-[var(--line)] lg:min-h-0 lg:max-w-[min(28rem,34%)] lg:border-l lg:border-t-0">
-              <div className="flex items-center justify-between gap-3 px-4 pt-4 sm:px-5 lg:px-6">
+            <aside className="relative flex min-h-[18rem] w-full min-w-0 flex-1 flex-col border-t border-[var(--line)] lg:min-h-0 lg:max-w-[min(30rem,36%)] lg:border-l lg:border-t-0">
+              <div className="flex items-center justify-between gap-3 px-4 pt-3 sm:px-5 lg:px-5">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
                   {featured.status === "upcoming" ? "Next circuit" : "Latest circuit"}
                   {featured.race.Circuit.Location.country
@@ -244,7 +244,7 @@ export default async function HomePage() {
                 circuitId={featured.race.Circuit.circuitId}
                 label={featured.race.Circuit.circuitName}
                 variant="hero"
-                className="min-h-[14rem] flex-1"
+                className="min-h-[16rem] flex-1"
               />
             </aside>
           ) : null}

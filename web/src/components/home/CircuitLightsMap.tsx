@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getCircuitAnnotation } from "@/lib/media/circuit-annotations";
+import { findPathCorners } from "@/lib/media/path-geometry";
 import { getTrackOutline } from "@/lib/media/track-outlines";
 
 type Props = {
@@ -11,8 +13,19 @@ type Props = {
   className?: string;
 };
 
+type TurnPin = {
+  key: string;
+  n: number;
+  name?: string;
+  x: number;
+  y: number;
+  lx: number;
+  ly: number;
+};
+
 /**
  * Circuit outline with a moving light along the path (SVG pathLength + dash).
+ * Hero variant fills the column and overlays turn / landmark labels when known.
  */
 export function CircuitLightsMap({
   circuitId,
@@ -21,6 +34,7 @@ export function CircuitLightsMap({
   className = "",
 }: Props) {
   const track = getTrackOutline(circuitId);
+  const ann = getCircuitAnnotation(circuitId);
   const [motionOk, setMotionOk] = useState(true);
   const hero = variant === "hero";
 
@@ -31,6 +45,40 @@ export function CircuitLightsMap({
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
+
+  const turns = useMemo<TurnPin[]>(() => {
+    if (!track) return [];
+    if (ann?.namedTurns?.length) {
+      return ann.namedTurns.map((t) => ({
+        key: `n-${t.n}`,
+        n: t.n,
+        name: t.name,
+        x: t.x,
+        y: t.y,
+        lx: t.x,
+        ly: t.y - 2.4,
+      }));
+    }
+    const corners = findPathCorners(track.d, {
+      minAngleDeg: hero ? 32 : 38,
+      minSpacing: 5.2,
+      maxTurns: ann?.turns ? Math.min(ann.turns, 16) : 12,
+    });
+    return corners.map((c, i) => ({
+      key: `a-${c.index}`,
+      n: i + 1,
+      x: c.x,
+      y: c.y,
+      lx: c.lx,
+      ly: c.ly,
+    }));
+  }, [track, ann, hero]);
+
+  const metaBits = [
+    ann?.lengthKm != null ? `${ann.lengthKm.toFixed(3)} km` : null,
+    ann?.turns != null ? `${ann.turns} turns` : turns.length ? `${turns.length} turns` : null,
+    ann?.drsZones != null ? `${ann.drsZones} DRS` : null,
+  ].filter(Boolean);
 
   return (
     <div
@@ -54,7 +102,7 @@ export function CircuitLightsMap({
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
-              "radial-gradient(ellipse 70% 55% at 50% 48%, color-mix(in srgb, var(--ink) 6%, transparent) 0%, transparent 70%)",
+              "radial-gradient(ellipse 75% 60% at 50% 46%, color-mix(in srgb, var(--ink) 5%, transparent) 0%, transparent 72%)",
           }}
           aria-hidden
         />
@@ -63,8 +111,9 @@ export function CircuitLightsMap({
       {track ? (
         <svg
           viewBox={track.viewBox}
+          preserveAspectRatio="xMidYMid meet"
           className={`absolute inset-0 h-full w-full ${
-            hero ? "p-6 sm:p-8 lg:p-10" : "p-4 sm:p-6"
+            hero ? "px-3 pb-10 pt-1 sm:px-4 sm:pb-11" : "p-4 sm:p-6"
           }`}
           fill="none"
           aria-hidden
@@ -73,20 +122,20 @@ export function CircuitLightsMap({
             d={track.d}
             pathLength={100}
             stroke="var(--ink)"
-            strokeWidth={hero ? 6 : 3.4}
+            strokeWidth={hero ? 5.5 : 3.4}
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity={hero ? 0.06 : 0.22}
+            opacity={hero ? 0.07 : 0.22}
           />
           <path
             d={track.d}
             pathLength={100}
             className="track-outline-path"
             stroke="var(--ink)"
-            strokeWidth={hero ? 1.15 : 1.85}
+            strokeWidth={hero ? 1.35 : 1.85}
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity={hero ? 0.72 : 0.85}
+            opacity={hero ? 0.78 : 0.85}
           />
           {motionOk ? (
             <>
@@ -94,23 +143,27 @@ export function CircuitLightsMap({
                 d={track.d}
                 pathLength={100}
                 className={
-                  hero ? "circuit-light-trail circuit-light-trail--hero" : "circuit-light-trail"
+                  hero
+                    ? "circuit-light-trail circuit-light-trail--hero"
+                    : "circuit-light-trail"
                 }
                 stroke={hero ? "var(--brand)" : "var(--live)"}
-                strokeWidth={hero ? 1.35 : 2.6}
+                strokeWidth={hero ? 1.4 : 2.6}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 fill="none"
               />
               <circle
-                r={hero ? 1.6 : 2.1}
+                r={hero ? 1.55 : 2.1}
                 className={
-                  hero ? "circuit-light-head circuit-light-head--hero" : "circuit-light-head"
+                  hero
+                    ? "circuit-light-head circuit-light-head--hero"
+                    : "circuit-light-head"
                 }
                 fill={hero ? "var(--brand)" : "var(--live)"}
               >
                 <animateMotion
-                  dur={hero ? "11s" : "7.5s"}
+                  dur={hero ? "12s" : "7.5s"}
                   repeatCount="indefinite"
                   path={track.d}
                   rotate="auto"
@@ -128,6 +181,108 @@ export function CircuitLightsMap({
               opacity={0.4}
             />
           )}
+
+          {ann?.startFinish ? (
+            <g>
+              <line
+                x1={ann.startFinish.x - 2.2}
+                y1={ann.startFinish.y - 1.6}
+                x2={ann.startFinish.x + 2.2}
+                y2={ann.startFinish.y + 1.6}
+                stroke="var(--ink)"
+                strokeWidth={0.55}
+                opacity={0.9}
+              />
+              <line
+                x1={ann.startFinish.x - 2.2}
+                y1={ann.startFinish.y + 1.6}
+                x2={ann.startFinish.x + 2.2}
+                y2={ann.startFinish.y - 1.6}
+                stroke="var(--ink)"
+                strokeWidth={0.55}
+                opacity={0.55}
+              />
+              <text
+                x={ann.startFinish.x}
+                y={ann.startFinish.y + 4.2}
+                textAnchor="middle"
+                fill="var(--muted)"
+                style={{
+                  fontSize: 2.4,
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                  letterSpacing: "0.08em",
+                }}
+              >
+                S/F
+              </text>
+            </g>
+          ) : null}
+
+          {hero &&
+            ann?.landmarks?.map((lm) => (
+              <text
+                key={lm.label}
+                x={lm.x}
+                y={lm.y}
+                textAnchor="middle"
+                fill="var(--muted)"
+                opacity={0.72}
+                style={{
+                  fontSize: 2.35,
+                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {lm.label}
+              </text>
+            ))}
+
+          {hero
+            ? turns.map((t) => (
+                <g key={t.key}>
+                  <circle
+                    cx={t.x}
+                    cy={t.y}
+                    r={1.15}
+                    fill="var(--bg)"
+                    stroke="var(--ink)"
+                    strokeWidth={0.45}
+                    opacity={0.92}
+                  />
+                  <text
+                    x={t.x}
+                    y={t.y + 0.85}
+                    textAnchor="middle"
+                    fill="var(--ink)"
+                    style={{
+                      fontSize: 2.05,
+                      fontFamily:
+                        "ui-monospace, SFMono-Regular, Menlo, monospace",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {t.n}
+                  </text>
+                  {t.name ? (
+                    <text
+                      x={t.lx}
+                      y={t.ly}
+                      textAnchor="middle"
+                      fill="var(--muted)"
+                      style={{
+                        fontSize: 2.15,
+                        fontFamily:
+                          "ui-monospace, SFMono-Regular, Menlo, monospace",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      {t.name}
+                    </text>
+                  ) : null}
+                </g>
+              ))
+            : null}
         </svg>
       ) : (
         <div className="absolute inset-0 flex items-center justify-center p-6">
@@ -137,17 +292,24 @@ export function CircuitLightsMap({
         </div>
       )}
 
-      {label ? (
-        <p
-          className={`absolute inset-x-0 bottom-0 px-4 pb-3 pt-8 font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] ${
-            hero
-              ? "bg-gradient-to-t from-[var(--bg)] via-[color-mix(in_srgb,var(--bg)_70%,transparent)] to-transparent text-center"
-              : "bg-gradient-to-t from-[var(--bg-soft)] via-[color-mix(in_srgb,var(--bg-soft)_88%,transparent)] to-transparent"
-          }`}
-        >
-          <span className="line-clamp-2">{label}</span>
-        </p>
-      ) : null}
+      <div
+        className={`absolute inset-x-0 bottom-0 space-y-1 px-4 pb-3 pt-8 ${
+          hero
+            ? "bg-gradient-to-t from-[var(--bg)] via-[color-mix(in_srgb,var(--bg)_75%,transparent)] to-transparent text-center"
+            : "bg-gradient-to-t from-[var(--bg-soft)] via-[color-mix(in_srgb,var(--bg-soft)_88%,transparent)] to-transparent"
+        }`}
+      >
+        {label ? (
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
+            <span className="line-clamp-2">{label}</span>
+          </p>
+        ) : null}
+        {hero && metaBits.length ? (
+          <p className="font-mono text-[10px] tracking-[0.14em] text-[color-mix(in_srgb,var(--muted)_85%,var(--ink))]">
+            {metaBits.join(" · ")}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }
