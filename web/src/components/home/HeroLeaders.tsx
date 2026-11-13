@@ -24,16 +24,18 @@ export function HeroLeaders({
   constructor: ctor,
   round,
   season,
+  className = "",
 }: {
   driver: HeroDriverLead | null;
   constructor: HeroConstructorLead | null;
   round: string;
   season: string;
+  className?: string;
 }) {
   if (!driver && !ctor) return null;
 
   return (
-    <div className="animate-hero-rise-delay w-full space-y-3">
+    <div className={`animate-hero-rise-delay w-full max-w-sm space-y-3 ${className}`}>
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="eyebrow">Leaders</p>
@@ -54,22 +56,22 @@ export function HeroLeaders({
         {driver ? (
           <Link
             href={`/drivers/${driver.id}`}
-            className="group flex items-center gap-3 border border-[var(--line)] px-3 py-2.5 transition-colors hover:bg-[var(--bg-elevated)]"
+            className="group grid grid-cols-[3.25rem_2.75rem_minmax(0,1fr)_auto] items-center gap-x-3 border border-[var(--line)] px-3 py-2.5 transition-colors hover:bg-[var(--bg-elevated)]"
           >
-            <span className="w-12 shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
               Driver
             </span>
             <DriverPortrait
               src={driver.shot}
               alt={driver.name}
               accent={driver.color}
-              className="h-11 w-11 shrink-0"
+              className="h-11 w-11"
               sizes="44px"
             />
-            <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ink)] group-hover:text-[var(--brand)] sm:text-base">
+            <span className="min-w-0 truncate text-sm font-medium text-[var(--ink)] group-hover:text-[var(--brand)]">
               {driver.name}
             </span>
-            <span className="shrink-0 font-mono text-sm text-[var(--ink)] sm:text-base">
+            <span className="font-mono text-sm tabular-nums text-[var(--ink)]">
               {driver.points}
             </span>
           </Link>
@@ -78,9 +80,9 @@ export function HeroLeaders({
         {ctor ? (
           <Link
             href={`/constructors/${ctor.id}`}
-            className="group flex items-center gap-3 border border-[var(--line)] px-3 py-2.5 transition-colors hover:bg-[var(--bg-elevated)]"
+            className="group grid grid-cols-[3.25rem_2.75rem_minmax(0,1fr)_auto] items-center gap-x-3 border border-[var(--line)] px-3 py-2.5 transition-colors hover:bg-[var(--bg-elevated)]"
           >
-            <span className="w-12 shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
               Team
             </span>
             <TeamLogoChip
@@ -89,10 +91,10 @@ export function HeroLeaders({
               className="h-11 w-11"
               sizes="44px"
             />
-            <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ink)] group-hover:text-[var(--brand)] sm:text-base">
+            <span className="min-w-0 truncate text-sm font-medium text-[var(--ink)] group-hover:text-[var(--brand)]">
               {ctor.name}
             </span>
-            <span className="shrink-0 font-mono text-sm text-[var(--ink)] sm:text-base">
+            <span className="font-mono text-sm tabular-nums text-[var(--ink)]">
               {ctor.points}
             </span>
           </Link>

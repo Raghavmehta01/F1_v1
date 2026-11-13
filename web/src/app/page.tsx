@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { HeroLeaders } from "@/components/home/HeroLeaders";
-import { HeroNews } from "@/components/home/HeroNews";
+import { HeroPack } from "@/components/home/HeroPack";
 import { HeroRankings } from "@/components/home/HeroRankings";
+import { NewsTicker } from "@/components/home/NewsTicker";
 import { NextRaceBoard } from "@/components/home/NextRaceBoard";
 import { RaceStrip } from "@/components/home/RaceStrip";
 import { RaceWeekendTimes } from "@/components/home/RaceWeekendTimes";
@@ -25,7 +26,6 @@ import { findNextSession } from "@/lib/data/next-session";
 import { raceSessionSlots } from "@/lib/data/race-sessions";
 import { teamColor } from "@/lib/media/team-colors";
 import type { ConstructorStanding, Race } from "@/lib/data/types";
-import { HeroPack } from "@/components/home/HeroPack";
 
 export const revalidate = 120;
 
@@ -185,24 +185,25 @@ export default async function HomePage() {
           aria-hidden
         />
 
-        <div className="relative z-10 flex h-[calc(100svh-4rem)] max-h-[calc(100svh-4rem)] overflow-hidden">
-          <div className="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:w-[min(34rem,38%)] lg:shrink-0 lg:gap-5 lg:px-8 lg:py-10 xl:w-[min(36rem,36%)] xl:pl-12">
-            <div className="space-y-2">
-              <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.35rem,7.2vw,5.25rem)] leading-[0.85] text-[var(--ink)]">
-                Formula 1
+        <NewsTicker items={headlines} />
+
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden lg:h-[calc(100svh-4rem-2.75rem)] lg:max-h-[calc(100svh-4rem-2.75rem)] lg:flex-row">
+          <div className="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:w-[min(32rem,36%)] lg:shrink-0 lg:gap-5 lg:px-8 lg:py-10 xl:pl-12">
+            <p className="font-display animate-hero-rise whitespace-nowrap text-[clamp(2.35rem,7.2vw,5.25rem)] leading-[0.85] text-[var(--ink)]">
+              Formula 1
+            </p>
+
+            <div className="animate-hero-rise-delay space-y-1.5">
+              <p className="eyebrow !text-[var(--brand)]">
+                {featured?.status === "upcoming" ? "Next up" : "Latest"}
               </p>
-              <div className="animate-hero-rise-delay space-y-1.5">
-                <p className="eyebrow !text-[var(--brand)]">
-                  {featured?.status === "upcoming" ? "Next up" : "Latest"}
-                </p>
-                <h1 className="font-display text-3xl leading-none tracking-tight text-[var(--ink)] sm:text-4xl">
-                  {raceName}
-                </h1>
-                <p className="max-w-lg text-sm leading-relaxed text-[var(--muted)]">
-                  {raceMeta}
-                  {lastRaceLabel ? ` · ${lastRaceLabel}` : ""}
-                </p>
-              </div>
+              <h1 className="font-display text-3xl leading-none tracking-tight text-[var(--ink)] sm:text-4xl">
+                {raceName}
+              </h1>
+              <p className="max-w-lg text-sm leading-relaxed text-[var(--muted)]">
+                {raceMeta}
+                {lastRaceLabel ? ` · ${lastRaceLabel}` : ""}
+              </p>
             </div>
 
             {nextSession ? (
@@ -216,29 +217,18 @@ export default async function HomePage() {
             ) : null}
           </div>
 
-          <aside className="hidden min-h-0 w-[min(22rem,28%)] shrink-0 flex-col justify-center gap-6 overflow-y-auto border-l border-[var(--line)] px-5 py-8 xl:w-[min(24rem,26%)] xl:px-6 lg:flex">
-            <HeroNews items={headlines} />
+          {/* Center rail — Leaders aligned mid-column */}
+          <aside className="flex w-full shrink-0 justify-center border-t border-[var(--line)] px-4 py-6 sm:px-6 lg:w-[min(22rem,26%)] lg:items-center lg:border-l lg:border-t-0 lg:px-5 lg:py-8">
             <HeroLeaders
               driver={leadDriver}
               constructor={leadConstructor}
               round={standingsRound}
               season={standingsSeason}
+              className="mx-auto"
             />
           </aside>
 
           <HeroPack />
-        </div>
-      </section>
-
-      {/* Mobile: leaders (news column is lg-only). */}
-      <section className="border-t border-[var(--line)] lg:hidden">
-        <div className="page-wrap py-6">
-          <HeroLeaders
-            driver={leadDriver}
-            constructor={leadConstructor}
-            round={standingsRound}
-            season={standingsSeason}
-          />
         </div>
       </section>
 

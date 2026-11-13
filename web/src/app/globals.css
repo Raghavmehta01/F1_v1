@@ -515,6 +515,40 @@ html[data-theme="light"] .loader-car-img {
   }
 }
 
+/* --- News ticker --- */
+.news-ticker-mask {
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 2%,
+    #000 98%,
+    transparent 100%
+  );
+}
+
+.news-ticker-track {
+  animation: news-ticker-scroll 55s linear infinite;
+}
+
+.news-ticker:hover .news-ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes news-ticker-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-ticker-track {
+    animation: none;
+  }
+}
+
 /* Chat page fills the window under the sticky header */
 .chat-page {
   height: calc(100dvh - var(--header-h));
