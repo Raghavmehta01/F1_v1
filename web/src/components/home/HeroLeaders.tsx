@@ -56,9 +56,9 @@ export function HeroLeaders({
         {driver ? (
           <Link
             href={`/drivers/${driver.id}`}
-            className="group grid grid-cols-[3rem_2.25rem_minmax(0,1fr)_auto] items-center gap-x-3 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--bg-elevated)_55%,transparent)]"
+            className="group grid grid-cols-[3.5rem_2.25rem_minmax(0,1fr)_auto] items-center gap-x-3 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--bg-elevated)_55%,transparent)]"
           >
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
+            <span className="truncate font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
               Driver
             </span>
             <DriverPortrait
@@ -80,9 +80,9 @@ export function HeroLeaders({
         {ctor ? (
           <Link
             href={`/constructors/${ctor.id}`}
-            className="group grid grid-cols-[3rem_2.25rem_minmax(0,1fr)_auto] items-center gap-x-3 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--bg-elevated)_55%,transparent)]"
+            className="group grid grid-cols-[3.5rem_2.25rem_minmax(0,1fr)_auto] items-center gap-x-3 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--bg-elevated)_55%,transparent)]"
           >
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
+            <span className="truncate font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
               Team
             </span>
             <TeamLogoChip

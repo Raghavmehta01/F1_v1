@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getCircuitAnnotation } from "@/lib/media/circuit-annotations";
-import { findPathCorners } from "@/lib/media/path-geometry";
+import { findPathCorners, tightViewBox } from "@/lib/media/path-geometry";
 import { getTrackOutline } from "@/lib/media/track-outlines";
 
 type Props = {
@@ -80,6 +80,11 @@ export function CircuitLightsMap({
     ann?.drsZones != null ? `${ann.drsZones} DRS` : null,
   ].filter(Boolean);
 
+  const viewBox = useMemo(() => {
+    if (!track) return "0 0 100 100";
+    return hero ? tightViewBox(track.d, 6, track.viewBox) : track.viewBox;
+  }, [track, hero]);
+
   return (
     <div
       className={`circuit-lights-map relative h-full w-full overflow-hidden ${
@@ -110,10 +115,10 @@ export function CircuitLightsMap({
 
       {track ? (
         <svg
-          viewBox={track.viewBox}
+          viewBox={viewBox}
           preserveAspectRatio="xMidYMid meet"
           className={`absolute inset-0 h-full w-full ${
-            hero ? "px-3 pb-10 pt-1 sm:px-4 sm:pb-11" : "p-4 sm:p-6"
+            hero ? "px-1 pb-9 pt-0 sm:px-2 sm:pb-10" : "p-4 sm:p-6"
           }`}
           fill="none"
           aria-hidden
@@ -122,20 +127,20 @@ export function CircuitLightsMap({
             d={track.d}
             pathLength={100}
             stroke="var(--ink)"
-            strokeWidth={hero ? 5.5 : 3.4}
+            strokeWidth={hero ? 6.2 : 3.4}
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity={hero ? 0.07 : 0.22}
+            opacity={hero ? 0.08 : 0.22}
           />
           <path
             d={track.d}
             pathLength={100}
             className="track-outline-path"
             stroke="var(--ink)"
-            strokeWidth={hero ? 1.35 : 1.85}
+            strokeWidth={hero ? 1.55 : 1.85}
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity={hero ? 0.78 : 0.85}
+            opacity={hero ? 0.86 : 0.85}
           />
           {motionOk ? (
             <>
@@ -148,13 +153,13 @@ export function CircuitLightsMap({
                     : "circuit-light-trail"
                 }
                 stroke={hero ? "var(--brand)" : "var(--live)"}
-                strokeWidth={hero ? 1.4 : 2.6}
+                strokeWidth={hero ? 1.55 : 2.6}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 fill="none"
               />
               <circle
-                r={hero ? 1.55 : 2.1}
+                r={hero ? 1.7 : 2.1}
                 className={
                   hero
                     ? "circuit-light-head circuit-light-head--hero"
@@ -185,30 +190,30 @@ export function CircuitLightsMap({
           {ann?.startFinish ? (
             <g>
               <line
-                x1={ann.startFinish.x - 2.2}
-                y1={ann.startFinish.y - 1.6}
-                x2={ann.startFinish.x + 2.2}
-                y2={ann.startFinish.y + 1.6}
+                x1={ann.startFinish.x - 2.4}
+                y1={ann.startFinish.y - 1.8}
+                x2={ann.startFinish.x + 2.4}
+                y2={ann.startFinish.y + 1.8}
                 stroke="var(--ink)"
-                strokeWidth={0.55}
-                opacity={0.9}
+                strokeWidth={0.65}
+                opacity={0.95}
               />
               <line
-                x1={ann.startFinish.x - 2.2}
-                y1={ann.startFinish.y + 1.6}
-                x2={ann.startFinish.x + 2.2}
-                y2={ann.startFinish.y - 1.6}
+                x1={ann.startFinish.x - 2.4}
+                y1={ann.startFinish.y + 1.8}
+                x2={ann.startFinish.x + 2.4}
+                y2={ann.startFinish.y - 1.8}
                 stroke="var(--ink)"
-                strokeWidth={0.55}
+                strokeWidth={0.65}
                 opacity={0.55}
               />
               <text
                 x={ann.startFinish.x}
-                y={ann.startFinish.y + 4.2}
+                y={ann.startFinish.y + 4.6}
                 textAnchor="middle"
                 fill="var(--muted)"
                 style={{
-                  fontSize: 2.4,
+                  fontSize: 2.7,
                   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
                   letterSpacing: "0.08em",
                 }}
@@ -226,9 +231,9 @@ export function CircuitLightsMap({
                 y={lm.y}
                 textAnchor="middle"
                 fill="var(--muted)"
-                opacity={0.72}
+                opacity={0.85}
                 style={{
-                  fontSize: 2.35,
+                  fontSize: 2.7,
                   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
@@ -244,19 +249,19 @@ export function CircuitLightsMap({
                   <circle
                     cx={t.x}
                     cy={t.y}
-                    r={1.15}
+                    r={1.35}
                     fill="var(--bg)"
                     stroke="var(--ink)"
-                    strokeWidth={0.45}
-                    opacity={0.92}
+                    strokeWidth={0.5}
+                    opacity={0.95}
                   />
                   <text
                     x={t.x}
-                    y={t.y + 0.85}
+                    y={t.y + 0.95}
                     textAnchor="middle"
                     fill="var(--ink)"
                     style={{
-                      fontSize: 2.05,
+                      fontSize: 2.35,
                       fontFamily:
                         "ui-monospace, SFMono-Regular, Menlo, monospace",
                       fontWeight: 600,
@@ -271,7 +276,7 @@ export function CircuitLightsMap({
                       textAnchor="middle"
                       fill="var(--muted)"
                       style={{
-                        fontSize: 2.15,
+                        fontSize: 2.45,
                         fontFamily:
                           "ui-monospace, SFMono-Regular, Menlo, monospace",
                         letterSpacing: "0.04em",

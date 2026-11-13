@@ -154,6 +154,29 @@ export function findPathCorners(
   });
 }
 
+/** Cropped viewBox around the polyline so the track fills its SVG frame. */
+export function tightViewBox(
+  d: string,
+  pad = 4,
+  fallback = "0 0 100 100",
+): string {
+  const pts = parsePolyline(d);
+  if (pts.length < 2) return fallback;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const p of pts) {
+    if (p.x < minX) minX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y > maxY) maxY = p.y;
+  }
+  const w = Math.max(1, maxX - minX);
+  const h = Math.max(1, maxY - minY);
+  return `${minX - pad} ${minY - pad} ${w + pad * 2} ${h + pad * 2}`;
+}
+
 export function pointAtFraction(d: string, t: number): Pt | null {
   const pts = parsePolyline(d);
   if (pts.length < 2) return null;
