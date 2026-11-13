@@ -3,6 +3,7 @@ import { Archivo_Black, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { IntroRadioSound } from "@/components/layout/IntroRadioSound";
+import { StartLightsIntro } from "@/components/layout/StartLightsIntro";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import "./globals.css";
 
@@ -64,6 +65,7 @@ export default function RootLayout({
     >
       <body className="relative flex min-h-full flex-col overflow-x-hidden">
         <ThemeProvider>
+          <StartLightsIntro />
           <IntroRadioSound />
           <Header />
           <main className="relative z-0 flex-1">{children}</main>

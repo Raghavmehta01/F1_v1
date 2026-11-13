@@ -24,6 +24,7 @@ import { findNextSession } from "@/lib/data/next-session";
 import { raceSessionSlots } from "@/lib/data/race-sessions";
 import { teamColor } from "@/lib/media/team-colors";
 import type { ConstructorStanding, Race } from "@/lib/data/types";
+import { NextRaceBoard } from "@/components/home/NextRaceBoard";
 import { SessionCountdown } from "@/components/home/SessionCountdown";
 
 export const revalidate = 120;
@@ -231,6 +232,20 @@ export default async function HomePage() {
           <HeroPack />
         </div>
       </section>
+
+      {featured ? (
+        <NextRaceBoard
+          race={featured.race}
+          status={featured.status}
+          countdownIso={nextSession?.slot.at}
+          countdownLabel={
+            nextSession
+              ? `${nextSession.slot.label} · ${nextSession.race.raceName}`
+              : featured.race.raceName
+          }
+          seasonTotal={races.length}
+        />
+      ) : null}
 
       {/* Mobile: leaders sit below the hero (news column is lg-only). */}
       <section className="border-t border-[var(--line)] lg:hidden">

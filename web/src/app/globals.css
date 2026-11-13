@@ -487,6 +487,32 @@ html[data-theme="light"] .loader-car-img {
   .loader-dots {
     animation: none;
   }
+
+  .circuit-light-trail {
+    animation: none !important;
+  }
+}
+
+/* --- Start lights intro --- */
+.start-light-on {
+  border-color: color-mix(in srgb, var(--brand) 55%, var(--line));
+  box-shadow: inset 0 0 18px color-mix(in srgb, var(--brand) 28%, transparent);
+}
+
+/* --- Circuit moving light --- */
+.circuit-light-trail {
+  stroke-dasharray: 10 90;
+  animation: circuit-light-run 7.5s linear infinite;
+}
+
+.circuit-light-head {
+  filter: drop-shadow(0 0 6px var(--live));
+}
+
+@keyframes circuit-light-run {
+  to {
+    stroke-dashoffset: -100;
+  }
 }
 
 /* Chat page fills the window under the sticky header */
