@@ -1,12 +1,14 @@
-# Pitwall
+# LapLedger
 
 Formula 1 hub: standings, calendar, results, history, ML race predictions, and an agentic chat assistant.
 
-**Brand:** Pitwall · **Creator:** [Raghav Mehta](https://www.linkedin.com/in/raghavmehta1/) · **Default theme:** dark · **Chat model:** Llama 3.3 70B (Groq) · **ML:** LightGBM (FastAPI)
+**Brand:** LapLedger · **Creator:** [Raghav Mehta](https://www.linkedin.com/in/raghavmehta1/) · **Default theme:** dark · **Chat model:** Llama 3.3 70B (Groq) · **ML:** LightGBM (FastAPI)
+
+**Repo:** [github.com/Raghavmehta01/lapledger](https://github.com/Raghavmehta01/lapledger) · **Live:** [lapledger.vercel.app](https://lapledger.vercel.app) (add this domain in Vercel if not yet primary)
 
 ## Fan-made / unofficial
 
-**Pitwall is a fan-made, independent open-source project.**  
+**LapLedger is a fan-made, independent open-source project.**  
 It has **nothing to do with** Formula 1 commercial entities, the FIA, teams, or drivers. Not affiliated with, endorsed by, sponsored by, or associated with any of them. Data via [Jolpica](https://github.com/jolpica/jolpica-f1) and [OpenF1](https://openf1.org/).
 
 ## License & attribution

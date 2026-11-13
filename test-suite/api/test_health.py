@@ -8,4 +8,4 @@ def test_health_ok(client: TestClient) -> None:
     assert res.status_code == 200
     body = res.json()
     assert body["status"] == "ok"
-    assert body["service"] == "pitwall-ml"
+    assert body["service"] == "lapledger-ml"

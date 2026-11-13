@@ -1,4 +1,4 @@
-"""Train the Pitwall finish model from Jolpica history.
+"""Train the LapLedger finish model from Jolpica history.
 
 Usage (from api/):
   python -m ml.train
@@ -18,7 +18,7 @@ from ml.paths import ARTIFACTS_DIR, META_PATH
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Train Pitwall LightGBM race model")
+    parser = argparse.ArgumentParser(description="Train LapLedger LightGBM race model")
     parser.add_argument("--start", type=int, default=2019)
     parser.add_argument("--end", type=int, default=datetime.now(timezone.utc).year - 1)
     parser.add_argument("--no-cache", action="store_true")

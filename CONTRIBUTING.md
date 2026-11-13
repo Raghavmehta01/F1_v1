@@ -1,11 +1,11 @@
-# Contributing to Pitwall
+# Contributing to LapLedger
 
-Thanks for helping improve Pitwall. Contributions are welcome — UI, ML, data
+Thanks for helping improve LapLedger. Contributions are welcome — UI, ML, data
 pipelines, docs, tests, or race-weekend features.
 
 ## Fan-made disclaimer
 
-Pitwall is a **fan-made** project by [Raghav Mehta](https://www.linkedin.com/in/raghavmehta1/).
+LapLedger is a **fan-made** project by [Raghav Mehta](https://www.linkedin.com/in/raghavmehta1/).
 It has **nothing to do with** Formula 1 commercial entities, the FIA, teams, or
 drivers. Do not imply official affiliation in PRs, docs, or marketing copy.
 
@@ -14,8 +14,8 @@ drivers. Do not imply official affiliation in PRs, docs, or marketing copy.
 - Copyright for the original work: **© 2026 Raghav Mehta**
 - License: [Apache License 2.0](LICENSE) — see also [NOTICE](NOTICE)
 - Redistributions **must retain** copyright, license, and NOTICE attribution
-- The **Pitwall** name and brand assets in `web/public/brand/` remain associated
-  with this project; do not present forks as the official Pitwall product
+- The **LapLedger** name and brand assets in `web/public/brand/` remain associated
+  with this project; do not present forks as the official LapLedger product
 - Footer / README credit to Raghav Mehta should stay in the main project
 
 By opening a pull request, you agree that your contribution is licensed under

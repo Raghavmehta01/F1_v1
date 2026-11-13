@@ -7,7 +7,7 @@ describe("feature: web health route", () => {
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({
       status: "ok",
-      service: "pitwall-web",
+      service: "lapledger-web",
     });
   });
 });

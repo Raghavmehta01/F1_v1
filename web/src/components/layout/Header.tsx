@@ -11,10 +11,10 @@ export function Header() {
         <Link
           href="/"
           className="group flex items-center gap-2.5 font-display text-[1.5rem] leading-none tracking-tight text-[var(--ink)] sm:gap-3 sm:text-[1.65rem]"
-          aria-label="Pitwall home"
+          aria-label="LapLedger home"
         >
           <Image
-            src="/brand/pitwall-mark-v2.png"
+            src="/brand/lapledger-mark-v2.png"
             alt=""
             width={334}
             height={128}
@@ -22,7 +22,7 @@ export function Header() {
             priority
             unoptimized
           />
-          <span>Pitwall</span>
+          <span>LapLedger</span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

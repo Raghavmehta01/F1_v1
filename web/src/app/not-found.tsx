@@ -11,7 +11,7 @@ export default function NotFound() {
         That page is not on the calendar.
       </p>
       <Link href="/" className="btn-primary">
-        Back to Pitwall
+        Back to LapLedger
       </Link>
     </div>
   );

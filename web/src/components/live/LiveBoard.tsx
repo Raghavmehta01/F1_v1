@@ -284,7 +284,7 @@ export function LiveBoard({
           ? ` · P1 ${snapshot.rows[0].name_acronym}`
           : ""
       }${snapshot.quali_segment ? ` · ${snapshot.quali_segment}` : ""}`
-    : "Pitwall Live timing";
+    : "LapLedger Live timing";
 
   return (
     <div className="space-y-8">
@@ -358,7 +358,7 @@ export function LiveBoard({
         </div>
 
         <div className="flex flex-col gap-3 sm:items-end">
-          <ShareCardButton title="Pitwall Live" text={shareText} />
+          <ShareCardButton title="LapLedger Live" text={shareText} />
           <label className="flex min-w-[16rem] flex-col gap-2 text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
             Session
             <select

@@ -9,7 +9,7 @@ import { createUpstreamCache } from "@/lib/data/upstream-cache";
 import { currentSeason } from "@/lib/security/validation";
 
 const BASE = "https://api.jolpi.ca/ergast/f1";
-const USER_AGENT = "Pitwall/0.1.0 (https://github.com/Raghavmehta01/F1_v1)";
+const USER_AGENT = "LapLedger/0.1.0 (https://github.com/Raghavmehta01/lapledger)";
 const jolpicaCache = createUpstreamCache("Jolpica");
 
 type MrData = {

@@ -3,7 +3,7 @@ import { safeFetch } from "@/lib/security";
 import { createUpstreamCache } from "@/lib/data/upstream-cache";
 
 const FEED = "https://www.formula1.com/en/latest/all.xml";
-const USER_AGENT = "Pitwall/0.1.0 (https://github.com/Raghavmehta01/F1_v1)";
+const USER_AGENT = "LapLedger/0.1.0 (https://github.com/Raghavmehta01/lapledger)";
 const newsCache = createUpstreamCache("F1News");
 
 export type F1Headline = {

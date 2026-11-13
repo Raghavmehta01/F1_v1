@@ -12,7 +12,7 @@ from app.chat.cache import cache_key, stats_cache
 from app.chat.rag import search_regulations
 
 JOLPICA = "https://api.jolpi.ca/ergast/f1"
-UA = "Pitwall-chat/0.1 (educational; +https://localhost)"
+UA = "LapLedger-chat/0.1 (educational; +https://localhost)"
 
 _http: httpx.Client | None = None
 

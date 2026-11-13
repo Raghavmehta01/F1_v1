@@ -13,7 +13,7 @@ import pandas as pd
 from ml.paths import CACHE_DIR
 
 BASE = "https://api.jolpi.ca/ergast/f1"
-UA = "Pitwall-ml/0.1 (educational)"
+UA = "LapLedger-ml/0.1 (educational)"
 
 
 def _get(path: str, *, retries: int = 3) -> dict[str, Any]:

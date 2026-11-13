@@ -26,23 +26,23 @@ const timing = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Pitwall",
-    template: "%s · Pitwall",
+    default: "LapLedger",
+    template: "%s · LapLedger",
   },
   description:
-    "Pitwall — Formula 1 standings, results, live timing, history, and race chat. Developed by Raghav Mehta.",
-  applicationName: "Pitwall",
+    "LapLedger — Formula 1 standings, results, live timing, history, and race chat. Developed by Raghav Mehta.",
+  applicationName: "LapLedger",
   authors: [{ name: "Raghav Mehta", url: "https://www.linkedin.com/in/raghavmehta1/" }],
   creator: "Raghav Mehta",
   publisher: "Raghav Mehta",
   other: {
     copyright:
-      "© 2026 Raghav Mehta. Pitwall — Apache License 2.0. Fan-made; not affiliated with F1 / FIA.",
+      "© 2026 Raghav Mehta. LapLedger — Apache License 2.0. Fan-made; not affiliated with F1 / FIA.",
   },
   icons: {
     icon: [
       { url: "/favicon.png", type: "image/png", sizes: "32x32" },
-      { url: "/brand/pitwall-mark-v2.png", type: "image/png" },
+      { url: "/brand/lapledger-mark-v2.png", type: "image/png" },
     ],
     apple: [{ url: "/brand/apple-touch-icon.png", sizes: "180x180" }],
     shortcut: "/favicon.png",

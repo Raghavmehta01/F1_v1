@@ -1,4 +1,4 @@
-# Pitwall test suite
+# LapLedger test suite
 
 Feature-oriented tests for the Next.js web app and FastAPI service.
 

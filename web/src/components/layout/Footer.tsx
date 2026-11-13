@@ -12,14 +12,14 @@ export function Footer() {
           <div className="space-y-3">
             <div className="flex items-center gap-2.5 font-display text-2xl leading-none tracking-tight text-[var(--ink)] sm:gap-3">
               <Image
-                src="/brand/pitwall-mark-v2.png"
+                src="/brand/lapledger-mark-v2.png"
                 alt=""
                 width={334}
                 height={128}
                 className="h-[1em] w-auto object-contain"
                 unoptimized
               />
-              <span>Pitwall</span>
+              <span>LapLedger</span>
             </div>
             <p className="max-w-md text-sm leading-relaxed text-[var(--muted)]">
               Fan-made race intelligence — standings, live timing, and regs
@@ -68,7 +68,7 @@ export function Footer() {
 
         <div className="space-y-3 border-t border-[var(--line)] pt-6 text-xs leading-relaxed text-[var(--muted)]">
           <p>
-            © {YEAR} Raghav Mehta. Pitwall is open source under the Apache
+            © {YEAR} Raghav Mehta. LapLedger is open source under the Apache
             License 2.0. Copyright and attribution notices must be retained
             (see LICENSE and NOTICE).
           </p>

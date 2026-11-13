@@ -6,7 +6,7 @@ export default function ChatPage() {
       <div className="mb-3 flex shrink-0 flex-wrap items-end justify-between gap-2 sm:mb-4">
         <div className="min-w-0">
           <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--muted)] sm:text-[10px]">
-            Radio · Pitwall
+            Radio · LapLedger
           </p>
           <h1 className="mt-0.5 font-display text-2xl tracking-tight text-[var(--ink)] sm:text-3xl md:text-4xl">
             Chat
@@ -30,7 +30,7 @@ export default function ChatPage() {
           fia.com
         </a>
         {" · "}
-        Pitwall by{" "}
+        LapLedger by{" "}
         <a
           href="https://www.linkedin.com/in/raghavmehta1/"
           target="_blank"

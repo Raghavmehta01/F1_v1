@@ -1,4 +1,4 @@
-"""Pitwall API — ML predictions + official-reg RAG chat."""
+"""LapLedger API — ML predictions + official-reg RAG chat."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="Pitwall API", version="0.3.0", lifespan=lifespan)
+app = FastAPI(title="LapLedger API", version="0.3.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

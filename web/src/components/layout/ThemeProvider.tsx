@@ -17,8 +17,8 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
-const STORAGE_KEY = "pitwall-theme";
-const THEME_EVENT = "pitwall-theme";
+const STORAGE_KEY = "lapledger-theme";
+const THEME_EVENT = "lapledger-theme";
 
 function applyTheme(theme: Theme) {
   document.documentElement.setAttribute("data-theme", theme);
