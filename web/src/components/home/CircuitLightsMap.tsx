@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getCircuitAnnotation } from "@/lib/media/circuit-annotations";
-import { findPathCorners, tightViewBox } from "@/lib/media/path-geometry";
+import {
+  centeredSquareViewBox,
+  findPathCorners,
+  tightViewBox,
+} from "@/lib/media/path-geometry";
 import { getTrackOutline } from "@/lib/media/track-outlines";
 
 type Props = {
@@ -21,6 +25,7 @@ type TurnPin = {
   y: number;
   lx: number;
   ly: number;
+  anchor: "start" | "middle" | "end";
 };
 
 /**
@@ -49,29 +54,42 @@ export function CircuitLightsMap({
   const turns = useMemo<TurnPin[]>(() => {
     if (!track) return [];
     if (ann?.namedTurns?.length) {
-      return ann.namedTurns.map((t) => ({
-        key: `n-${t.n}`,
-        n: t.n,
-        name: t.name,
-        x: t.x,
-        y: t.y,
-        lx: t.x,
-        ly: t.y - 2.4,
-      }));
+      return ann.namedTurns.map((t) => {
+        const lx = t.lx ?? t.x;
+        const ly = t.ly ?? t.y - 4.5;
+        return {
+          key: `n-${t.n}`,
+          n: t.n,
+          name: t.name,
+          x: t.x,
+          y: t.y,
+          lx,
+          ly,
+          anchor: t.anchor ?? "middle",
+        };
+      });
     }
     const corners = findPathCorners(track.d, {
       minAngleDeg: hero ? 32 : 38,
       minSpacing: 5.2,
       maxTurns: ann?.turns ? Math.min(ann.turns, 16) : 12,
     });
-    return corners.map((c, i) => ({
-      key: `a-${c.index}`,
-      n: i + 1,
-      x: c.x,
-      y: c.y,
-      lx: c.lx,
-      ly: c.ly,
-    }));
+    return corners.map((c, i) => {
+      // Push labels farther off the outline than the apex pin.
+      const dx = c.lx - c.x;
+      const dy = c.ly - c.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const push = 5.2;
+      return {
+        key: `a-${c.index}`,
+        n: i + 1,
+        x: c.x,
+        y: c.y,
+        lx: c.x + (dx / len) * push,
+        ly: c.y + (dy / len) * push,
+        anchor: "middle" as const,
+      };
+    });
   }, [track, ann, hero]);
 
   const metaBits = [
@@ -82,13 +100,14 @@ export function CircuitLightsMap({
 
   const viewBox = useMemo(() => {
     if (!track) return "0 0 100 100";
-    return hero ? tightViewBox(track.d, 6, track.viewBox) : track.viewBox;
+    if (hero) return centeredSquareViewBox(track.d, 0.2, track.viewBox);
+    return tightViewBox(track.d, 4, track.viewBox);
   }, [track, hero]);
 
   return (
     <div
-      className={`circuit-lights-map relative h-full w-full overflow-hidden ${
-        hero ? "bg-transparent" : "aspect-[4/3] bg-[var(--bg-soft)]"
+      className={`circuit-lights-map relative mx-auto overflow-hidden ${
+        hero ? "bg-transparent" : "aspect-[4/3] h-full w-full bg-[var(--bg-soft)]"
       } ${className}`}
       role="img"
       aria-label={label ?? track?.name ?? "Circuit map"}
@@ -118,7 +137,7 @@ export function CircuitLightsMap({
           viewBox={viewBox}
           preserveAspectRatio="xMidYMid meet"
           className={`absolute inset-0 h-full w-full ${
-            hero ? "px-1 pb-9 pt-0 sm:px-2 sm:pb-10" : "p-4 sm:p-6"
+            hero ? "p-2 pb-11" : "p-4 sm:p-6"
           }`}
           fill="none"
           aria-hidden
@@ -229,11 +248,14 @@ export function CircuitLightsMap({
                 key={lm.label}
                 x={lm.x}
                 y={lm.y}
-                textAnchor="middle"
+                textAnchor={lm.anchor ?? "middle"}
                 fill="var(--muted)"
-                opacity={0.85}
+                opacity={0.9}
+                stroke="var(--bg)"
+                strokeWidth={0.9}
+                paintOrder="stroke"
                 style={{
-                  fontSize: 2.7,
+                  fontSize: 2.55,
                   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
@@ -244,49 +266,69 @@ export function CircuitLightsMap({
             ))}
 
           {hero
-            ? turns.map((t) => (
-                <g key={t.key}>
-                  <circle
-                    cx={t.x}
-                    cy={t.y}
-                    r={1.35}
-                    fill="var(--bg)"
-                    stroke="var(--ink)"
-                    strokeWidth={0.5}
-                    opacity={0.95}
-                  />
-                  <text
-                    x={t.x}
-                    y={t.y + 0.95}
-                    textAnchor="middle"
-                    fill="var(--ink)"
-                    style={{
-                      fontSize: 2.35,
-                      fontFamily:
-                        "ui-monospace, SFMono-Regular, Menlo, monospace",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {t.n}
-                  </text>
-                  {t.name ? (
+            ? turns.map((t) => {
+                const named = Boolean(t.name);
+                const labelAway =
+                  Math.hypot(t.lx - t.x, t.ly - t.y) > 1.2;
+                return (
+                  <g key={t.key}>
+                    {named && labelAway ? (
+                      <line
+                        x1={t.x}
+                        y1={t.y}
+                        x2={t.lx}
+                        y2={t.ly}
+                        stroke="var(--line-strong)"
+                        strokeWidth={0.35}
+                        opacity={0.7}
+                      />
+                    ) : null}
+                    <circle
+                      cx={t.x}
+                      cy={t.y}
+                      r={1.25}
+                      fill="var(--bg)"
+                      stroke="var(--ink)"
+                      strokeWidth={0.5}
+                      opacity={0.95}
+                    />
                     <text
-                      x={t.lx}
-                      y={t.ly}
+                      x={t.x}
+                      y={t.y + 0.9}
                       textAnchor="middle"
-                      fill="var(--muted)"
+                      fill="var(--ink)"
                       style={{
-                        fontSize: 2.45,
+                        fontSize: 2.2,
                         fontFamily:
                           "ui-monospace, SFMono-Regular, Menlo, monospace",
-                        letterSpacing: "0.04em",
+                        fontWeight: 600,
                       }}
                     >
-                      {t.name}
+                      {t.n}
                     </text>
-                  ) : null}
-                </g>
-              ))
+                    {t.name ? (
+                      <text
+                        x={t.lx}
+                        y={t.ly}
+                        textAnchor={t.anchor}
+                        fill="var(--ink)"
+                        opacity={0.78}
+                        stroke="var(--bg)"
+                        strokeWidth={1.1}
+                        paintOrder="stroke"
+                        style={{
+                          fontSize: 2.4,
+                          fontFamily:
+                            "ui-monospace, SFMono-Regular, Menlo, monospace",
+                          letterSpacing: "0.03em",
+                        }}
+                      >
+                        {t.name}
+                      </text>
+                    ) : null}
+                  </g>
+                );
+              })
             : null}
         </svg>
       ) : (

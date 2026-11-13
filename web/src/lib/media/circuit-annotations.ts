@@ -5,14 +5,20 @@ export type CircuitLandmark = {
   label: string;
   x: number;
   y: number;
+  anchor?: "start" | "middle" | "end";
 };
 
 export type NamedTurn = {
   n: number;
   /** Optional landmark name beside the number. */
   name?: string;
+  /** Apex / pin on the path. */
   x: number;
   y: number;
+  /** Label position — keep clear of the outline. */
+  lx?: number;
+  ly?: number;
+  anchor?: "start" | "middle" | "end";
 };
 
 export type CircuitAnnotation = {
@@ -37,18 +43,18 @@ const ANNOTATIONS: Record<string, CircuitAnnotation> = {
     drsZones: 2,
     startFinish: { x: 42, y: 94.5 },
     landmarks: [
-      { label: "The Strip", x: 72, y: 58 },
-      { label: "Sphere", x: 78, y: 28 },
-      { label: "Koval", x: 28, y: 22 },
-      { label: "Harmon", x: 40, y: 88 },
+      { label: "The Strip", x: 88, y: 58, anchor: "start" },
+      { label: "Sphere", x: 88, y: 24, anchor: "start" },
+      { label: "Koval", x: 12, y: 28, anchor: "end" },
+      { label: "Harmon", x: 50, y: 88, anchor: "middle" },
     ],
     namedTurns: [
-      { n: 1, name: "Hairpin", x: 18, y: 78 },
-      { n: 5, name: "Sphere entry", x: 82, y: 34 },
-      { n: 8, x: 48, y: 8 },
-      { n: 12, name: "Onto Strip", x: 78, y: 40 },
-      { n: 14, name: "Strip end", x: 74, y: 82 },
-      { n: 17, x: 22, y: 94 },
+      { n: 1, name: "Hairpin", x: 17.5, y: 78, lx: 9, ly: 72, anchor: "end" },
+      { n: 5, name: "Sphere in", x: 82, y: 34, lx: 90, ly: 28, anchor: "start" },
+      { n: 8, x: 48, y: 8, lx: 48, ly: 3, anchor: "middle" },
+      { n: 12, name: "Onto Strip", x: 78, y: 40, lx: 90, ly: 46, anchor: "start" },
+      { n: 14, name: "Strip end", x: 76, y: 84, lx: 90, ly: 80, anchor: "start" },
+      { n: 17, x: 22, y: 94, lx: 12, ly: 90, anchor: "end" },
     ],
   },
   monaco: {

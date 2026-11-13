@@ -188,8 +188,8 @@ export default async function HomePage() {
         <NewsTicker items={headlines} />
 
         <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden lg:h-[calc(100svh-4rem-2.75rem)] lg:max-h-[calc(100svh-4rem-2.75rem)] lg:flex-row">
-          <div className="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto overflow-x-hidden px-5 py-6 sm:px-7 sm:py-8 lg:w-[min(28rem,32%)] lg:shrink-0 lg:gap-5 lg:px-8 lg:py-9 xl:pl-10">
-            <p className="font-display animate-hero-rise max-w-full text-[clamp(2rem,5.4vw,3.6rem)] leading-[0.95] tracking-tight text-[var(--ink)]">
+          <div className="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto overflow-x-hidden px-5 py-6 sm:px-7 sm:py-8 lg:w-[min(34rem,38%)] lg:shrink-0 lg:gap-5 lg:px-8 lg:py-9 xl:w-[min(36rem,40%)] xl:pl-10">
+            <p className="font-display animate-hero-rise max-w-full text-[clamp(2.15rem,5.8vw,4rem)] leading-[0.95] tracking-tight text-[var(--ink)]">
               Formula 1
             </p>
 
@@ -225,8 +225,8 @@ export default async function HomePage() {
           </div>
 
           {featured ? (
-            <aside className="relative flex min-h-[20rem] w-full min-w-0 flex-[1.35] flex-col border-t border-[var(--line)] lg:min-h-0 lg:border-l lg:border-t-0">
-              <div className="flex shrink-0 items-center justify-between gap-3 px-4 pt-3 sm:px-5">
+            <aside className="relative flex min-h-[18rem] w-full min-w-0 flex-1 flex-col border-t border-[var(--line)] lg:min-h-0 lg:border-l lg:border-t-0">
+              <div className="mx-auto flex w-full max-w-md shrink-0 items-center justify-between gap-3 px-4 pt-3 sm:px-5">
                 <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
                   {featured.status === "upcoming" ? "Next circuit" : "Latest circuit"}
                   {featured.race.Circuit.Location.country
@@ -240,16 +240,18 @@ export default async function HomePage() {
                   Track →
                 </Link>
               </div>
-              <CircuitLightsMap
-                circuitId={featured.race.Circuit.circuitId}
-                label={featured.race.Circuit.circuitName}
-                variant="hero"
-                className="min-h-[18rem] flex-1"
-              />
+              <div className="grid min-h-0 flex-1 place-items-center px-4 py-4">
+                <CircuitLightsMap
+                  circuitId={featured.race.Circuit.circuitId}
+                  label={featured.race.Circuit.circuitName}
+                  variant="hero"
+                  className="aspect-square w-[min(100%,28rem)] max-h-[min(100%,32rem)]"
+                />
+              </div>
             </aside>
           ) : null}
 
-          <HeroPack className="lg:max-w-[min(32rem,34%)]" />
+          <HeroPack className="w-[min(28rem,32%)]" />
         </div>
       </section>
 

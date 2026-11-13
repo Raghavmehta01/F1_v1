@@ -177,6 +177,33 @@ export function tightViewBox(
   return `${minX - pad} ${minY - pad} ${w + pad * 2} ${h + pad * 2}`;
 }
 
+/**
+ * Square viewBox centered on the track so the outline sits optically in the
+ * middle of the panel (no left/right bias from an asymmetric crop).
+ */
+export function centeredSquareViewBox(
+  d: string,
+  padRatio = 0.18,
+  fallback = "0 0 100 100",
+): string {
+  const pts = parsePolyline(d);
+  if (pts.length < 2) return fallback;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const p of pts) {
+    if (p.x < minX) minX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y > maxY) maxY = p.y;
+  }
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const half = (Math.max(maxX - minX, maxY - minY) / 2) * (1 + padRatio);
+  return `${cx - half} ${cy - half} ${half * 2} ${half * 2}`;
+}
+
 export function pointAtFraction(d: string, t: number): Pt | null {
   const pts = parsePolyline(d);
   if (pts.length < 2) return null;
